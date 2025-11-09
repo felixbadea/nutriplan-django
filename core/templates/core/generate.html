@@ -1,0 +1,150 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Generează Plan{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                    <h3 class="mb-0 fw-bold">Generează Planul Alimentar</h3>
+                    <p class="mb-0 mt-2 opacity-90">Completează datele tale pentru un plan personalizat</p>
+                </div>
+
+                <div class="card-body p-5">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-4">
+
+                            <!-- Vârsta -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    {{ form.age.label }}
+                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
+                                        title="Vârsta în ani (minim 18)"></i>
+                                </label>
+                                {{ form.age }}
+                                {% if form.age.errors %}
+                                <div class="text-danger small mt-1">{{ form.age.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Gen -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.gender.label }}</label>
+                                {{ form.gender }}
+                            </div>
+
+                            <!-- Greutate -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    {{ form.weight.label }}
+                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
+                                        title="Greutatea actuală în kg"></i>
+                                </label>
+                                {{ form.weight }}
+                            </div>
+
+                            <!-- Înălțime -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    {{ form.height.label }}
+                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
+                                        title="Înălțimea în cm (pentru BMI)"></i>
+                                </label>
+                                {{ form.height }}
+                            </div>
+
+                            <!-- Greutate țintă (NOU!) -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Greutate țintă (kg)
+                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
+                                        title="Opțional: obiectivul tău final"></i>
+                                </label>
+                                {{ form.target_weight }}
+                            </div>
+
+                            <!-- Nivel de activitate -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.activity_level.label }}</label>
+                                {{ form.activity_level }}
+                            </div>
+
+                            <!-- Raport nutrițional -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">
+                                    {{ form.macro_ratio.label }}
+                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
+                                        title="Alege raportul potrivit obiectivului tău"></i>
+                                </label>
+                                {{ form.macro_ratio }}
+
+                                <div id="macro-desc" class="mt-3 p-3 bg-light rounded border" style="display: none;">
+                                    <small class="text-muted">
+                                        <strong>Descriere:</strong>
+                                        <span id="desc-text">Alege un raport pentru detalii.</span>
+                                    </small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Buton -->
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn btn-success btn-lg shadow-sm">
+                                Salvează & Generează Planul
+                            </button>
+                        </div>
+
+                        <!-- Loading -->
+                        <div id="loading" class="text-center mt-3" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Se procesează...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Se calculează planul tău personalizat...</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Tooltip-uri
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+        // Descriere macro_ratio
+        const select = document.querySelector('[name="macro_ratio"]');
+        const descDiv = document.getElementById('macro-desc');
+        const descText = document.getElementById('desc-text');
+
+        function updateDescription() {
+            const selected = select.options[select.selectedIndex];
+            const desc = selected?.dataset.desc || "Alege un raport pentru a vedea detalii.";
+            descText.textContent = desc;
+            descDiv.style.display = desc && desc !== "Alege un raport pentru a vedea detalii." ? 'block' : 'none';
+        }
+
+        if (select) {
+            select.addEventListener('change', updateDescription);
+            updateDescription();
+        }
+
+        // Loading
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function () {
+                document.getElementById('loading').style.display = 'block';
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+
+{% block title %}Dashboard - Progresul tău{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Progresul tău</h1>
+            <p class="text-muted">Evoluția BMI-ului și greutății în timp</p>
+        </div>
+    </div>
+
+    <!-- GRAFIC + CARD BMI ACTUAL -->
+    <div class="row mb-5">
+        <!-- GRAFIC -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Evoluția BMI</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="bmiChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- BMI ACTUAL + GREUTATE ȚINTĂ -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h4>BMI actual</h4>
+                    {% if latest_bmi %}
+                    <h2 class="text-primary fw-bold">{{ latest_bmi }}</h2>
+                    <span class="badge {{ bmi_class }} fs-6 d-block mb-3">
+                        {{ bmi_status }}
+                    </span>
+
+                    <!-- GREUTATE ȚINTĂ + PROGRES -->
+                    {% if target_weight %}
+                    <hr class="my-3">
+                    <p class="mb-1"><strong>Greutate actuală:</strong> {{ current_weight }} kg</p>
+                    <p class="mb-1"><strong>Țintă:</strong> {{ target_weight }} kg</p>
+                    <p class="mb-2">
+                        <strong>Diferență:</strong>
+                        <span class="text-{% if current_weight > target_weight %}danger{% else %}success{% endif %}">
+                            {{ weight_diff }} kg
+                        </span>
+                    </p>
+
+                    <!-- BARA DE PROGRES -->
+                    <div class="progress mt-2" style="height: 12px;">
+                        <div class="progress-bar 
+                                     {% if is_gaining %}bg-info{% else %}bg-success{% endif %}"
+                            style="width: {{ progress_percent }}%">
+                        </div>
+                    </div>
+                    <p class="small text-muted mt-1 mb-0">
+                        {{ progress_percent }}% din drumul spre țintă
+                    </p>
+                    <p class="small text-muted">
+                        Est. <strong>{{ days_to_goal }} zile</strong> până la obiectiv
+                        <br><em>(0.5 kg/săptămână)</em>
+                    </p>
+                    {% else %}
+                    <p class="text-muted small">Nu ai setat o greutate țintă.</p>
+                    <a href="{% url 'generate' %}" class="btn btn-sm btn-outline-primary mt-2">
+                        Setează ținta acum
+                    </a>
+                    {% endif %}
+                    {% else %}
+                    <p class="text-muted">Nu ai planuri încă.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LISTA PLANURILOR -->
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-4">Planurile tale</h3>
+            {% if plans %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for plan in plans %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                {{ plan.created_at|date:"d M Y, H:i" }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-1"><strong>Calorii:</strong> {{ plan.daily_calories }} kcal</p>
+                            <p class="mb-1"><strong>Macros:</strong>
+                                P: {{ plan.proteins }}g | G: {{ plan.carbs }}g | L: {{ plan.fats }}g
+                            </p>
+                            <p class="mb-1"><strong>Activitate:</strong> {{ plan.get_activity_level_display }}</p>
+                            {% if plan.bmi %}
+                            <p class="mb-0"><strong>BMI:</strong>
+                                <span class="badge 
+                                                {% if plan.bmi < 18.5 %}bg-warning
+                                                {% elif plan.bmi <= 24.9 %}bg-success
+                                                {% elif plan.bmi <= 29.9 %}bg-warning
+                                                {% else %}bg-danger
+                                                {% endif %}">
+                                    {{ plan.bmi }}
+                                </span>
+                            </p>
+                            {% endif %}
+                            {% if plan.target_weight %}
+                            <p class="mb-0 mt-2">
+                                <small class="text-muted">
+                                    <strong>Țintă:</strong> {{ plan.target_weight }} kg
+                                </small>
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center py-5">
+                <p>Nu ai planuri salvate încă.</p>
+                <a href="{% url 'generate' %}" class="btn btn-primary">Generează primul plan</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('bmiChart').getContext('2d');
+
+        const labels = [
+            {% for plan in plans %}
+            "{{ plan.created_at|date:'d M' }}"{% if not forloop.last %}, {% endif %}
+    {% empty %}
+    "Fără date"
+    {% endfor %}
+    ];
+
+    const data = [
+        {% for plan in plans %}
+    { { plan.bmi | floatformat: 1 } } {% if not forloop.last %}, {% endif %}
+    {% empty %}
+    0
+    {% endfor %}
+    ];
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'BMI',
+                data: data,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: false, min: 15, max: 40, ticks: { stepSize: 2 } }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

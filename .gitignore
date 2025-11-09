@@ -1,0 +1,40 @@
+# .gitignore
+.env
+env/.env
+# Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+db.sqlite3
+*.log
+local_settings.py
+.DS_Store
+
+# Virtual Environment
+env/
+venv/
+ENV/
+env_*/
+.venv
+
+# Fișiere sensibile
+.env
+.env.local
+.env.*.local
+
+# Media & Static (în dezvoltare)
+media/
+staticfiles/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db

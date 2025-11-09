@@ -1,0 +1,101 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Plan Alimentar Personalizat{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-gradient text-white text-center py-4 rounded-top-4"
+                style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <h1 class="mb-0 fw-bold">
+                    <i class="fas fa-utensils me-2"></i> Plan Alimentar Personalizat
+                </h1>
+                <p class="mb-0 mt-2 opacity-90">Calculat după nevoile tale reale</p>
+            </div>
+
+            <div class="card-body p-5">
+                <form hx-post="/api/generate/" hx-target="#result" hx-swap="outerHTML" hx-indicator="#loading"
+                    class="needs-validation" novalidate>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-user text-primary"></i> Vârsta
+                            </label>
+                            <input type="number" name="age" class="form-control form-control-lg" required min="10"
+                                max="100" placeholder="ex: 30">
+                            <div class="invalid-feedback">Vârsta trebuie să fie între 10 și 100.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-venus-mars text-primary"></i> Gen
+                            </label>
+                            <select name="gender" class="form-select form-select-lg" required>
+                                <option value="M">Bărbat</option>
+                                <option value="F">Femeie</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-weight text-primary"></i> Greutate (kg)
+                            </label>
+                            <input type="number" step="0.1" name="weight" class="form-control form-control-lg" required
+                                placeholder="ex: 75.5">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-ruler-vertical text-primary"></i> Înălțime (cm)
+                            </label>
+                            <input type="number" name="height" class="form-control form-control-lg"
+                                placeholder="ex: 175">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-running text-primary"></i> Nivel de activitate
+                            </label>
+                            <select name="activity_level" class="form-select form-select-lg" required>
+                                <option value="sedentar">Sedentar</option>
+                                <option value="usor">Ușoară</option>
+                                <option value="moderata">Moderată</option>
+                                <option value="intensa">Intensă</option>
+                                <option value="foarte_intensa">Foarte intensă</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-chart-pie text-primary"></i> Raport nutrițional
+                            </label>
+                            <select name="macro_ratio" class="form-select form-select-lg" required>
+                                {% for r in macro_ratios %}
+                                <option value="{{ r.id }}">{{ r.name }} (P:{{ r.proteins }}% G:{{ r.carbs }}% L:{{
+                                    r.fats }}%)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4 shadow-sm">
+                        <i class="fas fa-calculator"></i> Generează Planul
+                    </button>
+
+                    <div id="loading" class="text-center mt-3 htmx-indicator">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Se calculează...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Se calculează planul tău personalizat...</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="result" class="mt-5"></div>
+{% endblock %}

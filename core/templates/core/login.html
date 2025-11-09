@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+{% block title %}Autentificare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                    <h3 class="mb-0">Autentificare</h3>
+                </div>
+                <div class="card-body p-5">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Utilizator</label>
+                            {{ form.username }}
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Parolă</label>
+                            {{ form.password }}
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Intră în cont</button>
+                    </form>
+                    <p class="text-center mt-3">
+                        Nu ai cont? <a href="{% url 'register' %}" class="text-primary">Înregistrează-te</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
