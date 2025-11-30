@@ -1,14 +1,14 @@
+# core/urls.py
 from django.urls import path
 from . import views
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
-    path('generate/', views.GeneratePlanView.as_view(), name='generate'),
+    path('generate-plan/', views.generate_plan_htmx, name='generate-plan'),
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+    path('plan/<int:plan_id>/', views.plan_detail_view, name='view-plan'),
 
-    # Auth
-    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.RegisterView.as_view(), name='register'),
+    path('login/', views.LoginView.as_view(), name='login'),
+    path('logout/', views.logout_view, name='logout'),
 ]

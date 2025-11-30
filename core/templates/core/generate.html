@@ -1,111 +1,114 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}Generează Plan{% endblock %}
+{% block title %}Plan Alimentar Personalizat{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/home.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
-                    <h3 class="mb-0 fw-bold">Generează Planul Alimentar</h3>
-                    <p class="mb-0 mt-2 opacity-90">Completează datele tale pentru un plan personalizat</p>
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header text-white text-center py-4 rounded-top-4"
+                    style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <h1 class="mb-0 fw-bold">Plan Alimentar Personalizat</h1>
+                    <p class="mb-0 mt-2 opacity-90">Calculat după nevoile tale reale</p>
                 </div>
 
                 <div class="card-body p-5">
-                    <form method="post" class="needs-validation" novalidate>
+                    <form hx-post="{% url 'generate-plan' %}" hx-target="#result" hx-swap="outerHTML"
+                        hx-indicator="#loading" class="needs-validation" novalidate>
+
                         {% csrf_token %}
 
                         <div class="row g-4">
-
-                            <!-- Vârsta -->
+                            <!-- VÂRSTĂ -->
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">
-                                    {{ form.age.label }}
-                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
-                                        title="Vârsta în ani (minim 18)"></i>
-                                </label>
-                                {{ form.age }}
-                                {% if form.age.errors %}
-                                <div class="text-danger small mt-1">{{ form.age.errors|join:", " }}</div>
-                                {% endif %}
+                                <label class="form-label fw-semibold">Vârsta</label>
+                                <input type="number" name="age" class="form-control form-control-lg" required min="18"
+                                    max="100" placeholder="ex: 30">
                             </div>
 
-                            <!-- Gen -->
+                            <!-- GEN -->
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">{{ form.gender.label }}</label>
-                                {{ form.gender }}
+                                <label class="form-label fw-semibold">Gen</label>
+                                <select name="gender" class="form-select form-select-lg" required>
+                                    <option value="M">Bărbat</option>
+                                    <option value="F">Femeie</option>
+                                </select>
                             </div>
 
-                            <!-- Greutate -->
+                            <!-- GREUTATE -->
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">
-                                    {{ form.weight.label }}
-                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
-                                        title="Greutatea actuală în kg"></i>
-                                </label>
-                                {{ form.weight }}
+                                <label class="form-label fw-semibold">Greutate (kg)</label>
+                                <input type="number" step="0.1" name="weight" class="form-control form-control-lg"
+                                    required placeholder="ex: 75.5">
                             </div>
 
-                            <!-- Înălțime -->
+                            <!-- ÎNĂLȚIME -->
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">
-                                    {{ form.height.label }}
-                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
-                                        title="Înălțimea în cm (pentru BMI)"></i>
-                                </label>
-                                {{ form.height }}
+                                <label class="form-label fw-semibold">Înălțime (cm) <small
+                                        class="text-muted">(opțional)</small></label>
+                                <input type="number" name="height" class="form-control form-control-lg"
+                                    placeholder="ex: 175">
                             </div>
 
-                            <!-- Greutate țintă (NOU!) -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">
-                                    Greutate țintă (kg)
-                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
-                                        title="Opțional: obiectivul tău final"></i>
-                                </label>
-                                {{ form.target_weight }}
-                            </div>
-
-                            <!-- Nivel de activitate -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">{{ form.activity_level.label }}</label>
-                                {{ form.activity_level }}
-                            </div>
-
-                            <!-- Raport nutrițional -->
+                            <!-- NIVEL DE ACTIVITATE (în engleză – obligatoriu!) -->
                             <div class="col-md-12">
-                                <label class="form-label fw-semibold">
-                                    {{ form.macro_ratio.label }}
-                                    <i class="fas fa-info-circle text-primary" data-bs-toggle="tooltip"
-                                        title="Alege raportul potrivit obiectivului tău"></i>
-                                </label>
-                                {{ form.macro_ratio }}
+                                <label class="form-label fw-semibold">Nivel de activitate</label>
+                                <select name="activity_level" class="form-select form-select-lg" required>
+                                    <option value="sedentary">Sedentar</option>
+                                    <option value="light">Ușoară</option>
+                                    <option value="moderate">Moderată</option>
+                                    <option value="active">Intensă</option>
+                                    <option value="very_active">Foarte intensă</option>
+                                </select>
+                            </div>
 
-                                <div id="macro-desc" class="mt-3 p-3 bg-light rounded border" style="display: none;">
-                                    <small class="text-muted">
-                                        <strong>Descriere:</strong>
-                                        <span id="desc-text">Alege un raport pentru detalii.</span>
-                                    </small>
+                            <!-- RAPORT MACRO -->
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Raport Macro</label>
+                                <select name="macro_ratio" class="form-select form-select-lg" required>
+                                    <option value="">-- Alege un raport --</option>
+                            
+                                    {% for r in macro_ratios %}
+                                    {% if selected_macro_id == r.id %}
+                                    <option value="{{ r.id }}" data-desc="{{ r.description|escape }}"
+                                        data-fiber="{{ r.fiber_recommendation|default:'14g / 1000 kcal' }}" selected>
+                                        {{ r.name }} (P:{{ r.proteins }}% C:{{ r.carbs }}% G:{{ r.fats }}%)
+                                    </option>
+                                    {% else %}
+                                    <option value="{{ r.id }}" data-desc="{{ r.description|escape }}"
+                                        data-fiber="{{ r.fiber_recommendation|default:'14g / 1000 kcal' }}">
+                                        {{ r.name }} (P:{{ r.proteins }}% C:{{ r.carbs }}% G:{{ r.fats }}%)
+                                    </option>
+                                    {% endif %}
+                                    {% empty %}
+                                    <option disabled>Nu există rapoarte macro în baza de date.</option>
+                                    {% endfor %}
+                                </select>
+                            
+                                <div id="macro-desc" class="macro-desc mt-3 p-4 rounded shadow-sm" style="display: none;">
+                                    <p id="desc-text" class="mb-2 lead"></p>
+                                    <p class="small text-muted mb-0">
+                                        <strong>Fibre recomandate:</strong>
+                                        <span id="fiber-info">14g / 1000 kcal</span>
+                                        <em>(USDA & EFSA)</em>
+                                    </p>
                                 </div>
                             </div>
-
                         </div>
 
-                        <!-- Buton -->
-                        <div class="d-grid mt-5">
-                            <button type="submit" class="btn btn-success btn-lg shadow-sm">
-                                Salvează & Generează Planul
-                            </button>
-                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4 shadow-sm fw-semibold">
+                            Generează Planul
+                        </button>
 
-                        <!-- Loading -->
-                        <div id="loading" class="text-center mt-3" style="display: none;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Se procesează...</span>
-                            </div>
-                            <p class="mt-2 text-muted">Se calculează planul tău personalizat...</p>
+                        <div id="loading" class="htmx-indicator text-center my-5">
+                            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                            <p class="mt-3 text-muted fs-5">Se generează planul tău personalizat...</p>
                         </div>
                     </form>
                 </div>
@@ -114,37 +117,25 @@
     </div>
 </div>
 
-<!-- JavaScript -->
+<div id="result" class="mt-5"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/home.js' %}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Tooltip-uri
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
-
-        // Descriere macro_ratio
-        const select = document.querySelector('[name="macro_ratio"]');
-        const descDiv = document.getElementById('macro-desc');
-        const descText = document.getElementById('desc-text');
-
-        function updateDescription() {
-            const selected = select.options[select.selectedIndex];
-            const desc = selected?.dataset.desc || "Alege un raport pentru a vedea detalii.";
-            descText.textContent = desc;
-            descDiv.style.display = desc && desc !== "Alege un raport pentru a vedea detalii." ? 'block' : 'none';
-        }
-
-        if (select) {
-            select.addEventListener('change', updateDescription);
-            updateDescription();
-        }
-
-        // Loading
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function () {
-                document.getElementById('loading').style.display = 'block';
-            });
-        }
-    });
+    // Validare Bootstrap
+    (function () {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
 </script>
 {% endblock %}

@@ -1,182 +1,85 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-
-{% block title %}Dashboard - Progresul tău{% endblock %}
+{% block title %}Planurile Mele • NutriPlan{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="mb-4">Progresul tău</h1>
-            <p class="text-muted">Evoluția BMI-ului și greutății în timp</p>
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold mb-1">Planurile Mele</h2>
+            <p class="text-muted mb-0">Ai salvate {{ plans.count }} plan{{ plans.count|pluralize }} alimentar{{
+                plans.count|pluralize:",e" }}</p>
         </div>
+        <a href="{% url 'home' %}" class="btn btn-primary btn-lg shadow-sm">
+            <i class="bi bi-plus-circle me-2"></i> Plan nou
+        </a>
     </div>
 
-    <!-- GRAFIC + CARD BMI ACTUAL -->
-    <div class="row mb-5">
-        <!-- GRAFIC -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Evoluția BMI</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="bmiChart" height="100"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- BMI ACTUAL + GREUTATE ȚINTĂ -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <h4>BMI actual</h4>
-                    {% if latest_bmi %}
-                    <h2 class="text-primary fw-bold">{{ latest_bmi }}</h2>
-                    <span class="badge {{ bmi_class }} fs-6 d-block mb-3">
-                        {{ bmi_status }}
-                    </span>
-
-                    <!-- GREUTATE ȚINTĂ + PROGRES -->
-                    {% if target_weight %}
-                    <hr class="my-3">
-                    <p class="mb-1"><strong>Greutate actuală:</strong> {{ current_weight }} kg</p>
-                    <p class="mb-1"><strong>Țintă:</strong> {{ target_weight }} kg</p>
-                    <p class="mb-2">
-                        <strong>Diferență:</strong>
-                        <span class="text-{% if current_weight > target_weight %}danger{% else %}success{% endif %}">
-                            {{ weight_diff }} kg
-                        </span>
-                    </p>
-
-                    <!-- BARA DE PROGRES -->
-                    <div class="progress mt-2" style="height: 12px;">
-                        <div class="progress-bar 
-                                     {% if is_gaining %}bg-info{% else %}bg-success{% endif %}"
-                            style="width: {{ progress_percent }}%">
-                        </div>
+    {% if plans %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for plan in plans %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h4 class="card-title mb-0">{{ plan.daily_calories }} <small
+                                class="text-muted fs-6">kcal/zi</small></h4>
+                        <span class="badge bg-primary fs-6">{{ plan.macro_ratio.name }}</span>
                     </div>
-                    <p class="small text-muted mt-1 mb-0">
-                        {{ progress_percent }}% din drumul spre țintă
-                    </p>
-                    <p class="small text-muted">
-                        Est. <strong>{{ days_to_goal }} zile</strong> până la obiectiv
-                        <br><em>(0.5 kg/săptămână)</em>
-                    </p>
-                    {% else %}
-                    <p class="text-muted small">Nu ai setat o greutate țintă.</p>
-                    <a href="{% url 'generate' %}" class="btn btn-sm btn-outline-primary mt-2">
-                        Setează ținta acum
-                    </a>
-                    {% endif %}
-                    {% else %}
-                    <p class="text-muted">Nu ai planuri încă.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- LISTA PLANURILOR -->
-    <div class="row">
-        <div class="col-12">
-            <h3 class="mb-4">Planurile tale</h3>
-            {% if plans %}
-            <div class="row row-cols-1 row-cols-md-2 g-4">
-                {% for plan in plans %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-header bg-light">
-                            <h6 class="mb-0">
-                                {{ plan.created_at|date:"d M Y, H:i" }}
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-1"><strong>Calorii:</strong> {{ plan.daily_calories }} kcal</p>
-                            <p class="mb-1"><strong>Macros:</strong>
-                                P: {{ plan.proteins }}g | G: {{ plan.carbs }}g | L: {{ plan.fats }}g
-                            </p>
-                            <p class="mb-1"><strong>Activitate:</strong> {{ plan.get_activity_level_display }}</p>
-                            {% if plan.bmi %}
-                            <p class="mb-0"><strong>BMI:</strong>
-                                <span class="badge 
-                                                {% if plan.bmi < 18.5 %}bg-warning
-                                                {% elif plan.bmi <= 24.9 %}bg-success
-                                                {% elif plan.bmi <= 29.9 %}bg-warning
-                                                {% else %}bg-danger
-                                                {% endif %}">
-                                    {{ plan.bmi }}
-                                </span>
-                            </p>
-                            {% endif %}
-                            {% if plan.target_weight %}
-                            <p class="mb-0 mt-2">
-                                <small class="text-muted">
-                                    <strong>Țintă:</strong> {{ plan.target_weight }} kg
-                                </small>
-                            </p>
-                            {% endif %}
-                        </div>
+                    <ul class="list-unstyled mb-4 flex-grow-1">
+                        <li class="mb-2"><strong class="text-success">P:</strong> {{ plan.proteins }}g</li>
+                        <li class="mb-2"><strong class="text-warning">C:</strong> {{ plan.carbs }}g</li>
+                        <li class="mb-2"><strong class="text-danger">G:</strong> {{ plan.fats }}g</li>
+                        {% if plan.bmi %}
+                        <li class="mt-3"><strong>BMI:</strong> <span class="badge bg-info">{{ plan.bmi }}</span></li>
+                        {% endif %}
+                    </ul>
+
+                    <div class="text-muted small mb-3">
+                        <i class="bi bi-calendar3"></i> {{ plan.created_at|date:"d F Y" }}
+                        <i class="bi bi-clock ms-3"></i> {{ plan.created_at|time:"H:i" }}
+                    </div>
+
+                    <div class="mt-auto">
+                        <!-- Buton Vezi Planul (fără print) -->
+                        <a href="{% url 'view-plan' plan.id %}" class="btn btn-outline-primary w-100 mb-2">
+                            Vezi planul complet
+                        </a>
+
+                        <!-- Buton PDF / Tipărire (se deschide în tab nou și apelează print automat) -->
+                        <a href="{% url 'view-plan' plan.id %}?print=1" target="_blank" class="btn btn-success w-100">
+                            <i class="bi bi-printer"></i> Tipărește / Salvează PDF
+                        </a>
                     </div>
                 </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <div class="alert alert-info text-center py-5">
-                <p>Nu ai planuri salvate încă.</p>
-                <a href="{% url 'generate' %}" class="btn btn-primary">Generează primul plan</a>
-            </div>
-            {% endif %}
         </div>
+        {% endfor %}
     </div>
+    {% else %}
+    <div class="text-center py-5 my-5">
+        <img src="{% static 'img/empty-plans.svg' %}" alt="Fără planuri" class="mb-4"
+            style="max-width: 220px; opacity: 0.8;">
+        <h3 class="text-muted mt-4">Nu ai niciun plan salvat încă</h3>
+        <p class="text-muted mb-4">Generează-ți primul plan alimentar personalizat în doar în câteva secunde!</p>
+        <a href="{% url 'home' %}" class="btn btn-primary btn-lg px-5">
+            Creează primul meu plan
+        </a>
+    </div>
+    {% endif %}
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Hover efect mic pentru carduri -->
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('bmiChart').getContext('2d');
-
-        const labels = [
-            {% for plan in plans %}
-            "{{ plan.created_at|date:'d M' }}"{% if not forloop.last %}, {% endif %}
-    {% empty %}
-    "Fără date"
-    {% endfor %}
-    ];
-
-    const data = [
-        {% for plan in plans %}
-    { { plan.bmi | floatformat: 1 } } {% if not forloop.last %}, {% endif %}
-    {% empty %}
-    0
-    {% endfor %}
-    ];
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'BMI',
-                data: data,
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: false, min: 15, max: 40, ticks: { stepSize: 2 } }
-            }
-        }
-    });
-});
-</script>
+    .hover-shadow:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+</style>
 {% endblock %}

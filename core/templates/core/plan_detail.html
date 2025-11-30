@@ -1,0 +1,131 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Planul meu • {{ plan.daily_calories }} kcal{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        body {
+            background: white;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd;
+        }
+
+        .table {
+            font-size: 12px;
+        }
+
+        .print-title {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    }
+
+    .meal-card {
+        border-left: 5px solid #0d6efd;
+    }
+
+    .day-header {
+        background: #f8f9fa;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Titlu mare pentru print -->
+    <div class="print-title no-print">Planul Meu Alimentar</div>
+
+    <!-- Header cu info generale -->
+    <div class="card shadow-sm mb-4 no-print">
+        <div class="card-body">
+            <div class="row text-center text-md-start">
+                <div class="col-md-8">
+                    <h3>{{ plan.daily_calories }} kcal/zi • {{ plan.macro_ratio.name }}</h3>
+                    <p class="mb-0">
+                        <strong>Proteine:</strong> {{ plan.proteins }}g |
+                        <strong>Carbohidrați:</strong> {{ plan.carbs }}g |
+                        <strong>Grăsimi:</strong> {{ plan.fats }}g
+                        {% if plan.bmi %} | <strong>BMI:</strong> {{ plan.bmi }}{% endif %}
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button onclick="window.print()" class="btn btn-success btn-lg">
+                        Tipărește / Salvează ca PDF
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary ms-2">
+                        Înapoi la planuri
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Planul pe zile -->
+    {% for day, meals in plan_data.meals.items %}
+    <div class="card shadow-sm mb-4 meal-card">
+        <div class="card-header day-header py-3">
+            <h4 class="mb-0">{{ day }}</h4>
+        </div>
+        <div class="card-body">
+            {% for meal_name, dishes in meals.items %}
+            <div class="mb-4">
+                <h5 class="text-primary border-bottom pb-2">{{ meal_name }}</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Aliment</th>
+                                <th class="text-end">Kcal</th>
+                                <th class="text-end">P</th>
+                                <th class="text-end">C</th>
+                                <th class="text-end">G</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dish in dishes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ dish.name }}</strong>
+                                    <span class="badge bg-success ms-2">{{ dish.grams }}g</span> <!-- AICI VEDE USERUL CÂT SĂ MĂNÂNCE -->
+                                </td>
+                                <td class="text-end">{{ dish.calories }}</td>
+                                <td class="text-end text-success fw-bold">{{ dish.proteins }}g</td>
+                                <td class="text-end text-warning fw-bold">{{ dish.carbs }}g</td>
+                                <td class="text-end text-danger fw-bold">{{ dish.fats }}g</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="text-center py-4 no-print">
+        <p class="text-muted">Plan generat pe NutriPlan • {{ plan.created_at|date:"d F Y" }}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Dacă ?print=1 în URL → tipărește automat
+    if (window.location.search.includes('print=1')) {
+        window.print();
+    }
+</script>
+{% endblock %}

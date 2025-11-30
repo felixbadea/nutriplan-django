@@ -1,3 +1,4 @@
+# core\forms.py
 from django import forms
 from .models import MacroRatio
 
@@ -32,7 +33,7 @@ class MealPlanForm(forms.Form):
     )
     activity_level = forms.ChoiceField(
         choices=[
-            ('sedentar', 'Sedentar'),
+            ('sedentary', 'Sedentar'),
             ('usor', 'Ușoară'),
             ('moderata', 'Moderată'),
             ('intensa', 'Intensă'),

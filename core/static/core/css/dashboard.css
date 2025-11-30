@@ -1,0 +1,60 @@
+/* core/static/core/css/dashboard.css */
+
+.macro-ratio-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    padding: 18px;
+    margin: 16px 0;
+    text-align: center;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.macro-item {
+    display: inline-block;
+    margin: 0 14px;
+    min-width: 70px;
+}
+
+.macro-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.macro-label {
+    font-size: 0.75rem;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 500;
+}
+
+.protein {
+    color: #e74c3c;
+}
+
+.carbs {
+    color: #3498db;
+}
+
+.fats {
+    color: #f39c12;
+}
+
+.progress-sm {
+    height: 10px;
+    border-radius: 8px;
+    background: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 8px;
+    transition: width 0.6s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}

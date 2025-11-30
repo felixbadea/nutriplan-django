@@ -1,0 +1,81 @@
+/* core/static/core/css/generate.css */
+
+.macro-desc {
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    padding: 16px;
+    border-radius: 0 8px 8px 0;
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: #495057;
+    transition: all 0.3s ease;
+}
+
+.macro-desc strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.loading {
+    text-align: center;
+    color: #95a5a6;
+    font-style: italic;
+    margin: 20px 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.loading.htmx-request {
+    opacity: 1;
+}
+
+.spinner-border {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.form-select,
+.form-control {
+    padding: 12px 14px;
+    font-size: 1rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.card {
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.result-container {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.dish-item {
+    transition: all 0.2s ease;
+}
+
+.dish-item:hover {
+    background-color: #e9ecef !important;
+    transform: translateX(4px);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

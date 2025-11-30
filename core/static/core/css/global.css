@@ -1,12 +1,4 @@
-
-body {
-    background: lightcoral !important;
-}
-
-
 /* Reset & Base */
-
-
 * {
     margin: 0;
     padding: 0;
@@ -20,7 +12,6 @@ body {
     color: #2c3e50;
 }
 
-/* Container */
 .container {
     max-width: 700px;
     margin: 40px auto;
@@ -30,7 +21,6 @@ body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-/* Header */
 .header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -52,7 +42,6 @@ body {
     font-size: 1.1rem;
 }
 
-/* Form */
 .form-container {
     padding: 35px;
 }
@@ -91,7 +80,6 @@ select:focus {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* Buttons */
 .btn-primary,
 .btn-secondary {
     width: 100%;
@@ -125,7 +113,6 @@ select:focus {
     transform: translateY(-2px);
 }
 
-/* Loading */
 .loading {
     text-align: center;
     color: #95a5a6;
@@ -139,62 +126,10 @@ select:focus {
     opacity: 1;
 }
 
-/* Result */
 .result-container {
     animation: fadeIn 0.6s ease;
 }
 
-.summary {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 12px;
-    margin: 20px 0;
-    text-align: center;
-}
-
-.highlight {
-    color: #e74c3c;
-    font-size: 1.3rem;
-}
-
-.meal-card {
-    background: #f8f9fa;
-    padding: 18px;
-    margin: 15px 0;
-    border-radius: 12px;
-    border-left: 5px solid #667eea;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.meal-card h3 {
-    color: #2c3e50;
-    margin-bottom: 12px;
-    font-size: 1.3rem;
-}
-
-.dish-item {
-    background: white;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: 1px solid #eee;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.95rem;
-}
-
-.dish-item i {
-    color: #667eea;
-}
-
-.calories {
-    margin-left: auto;
-    color: #7f8c8d;
-    font-weight: 500;
-}
-
-/* Animations */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -207,6 +142,25 @@ select:focus {
     }
 }
 
-.card-header.bg-gradient {
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+.input-group-text {
+    background-color: #f8f9fa !important;
+    border-right: 0;
+}
+
+.form-control {
+    border-left: 0;
+    border-radius: 0.375rem !important;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 111, 253, 0.15);
+    border-color: #86b7fe;
+}
+
+.card {
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
 }

@@ -1,0 +1,451 @@
+[
+  {
+    "model": "core.dish",
+    "pk": 1,
+    "fields": {
+      "name": "Ou fiert tare",
+      "calories": 155,
+      "proteins": 13.0,
+      "carbs": 1.1,
+      "fats": 11.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 2,
+    "fields": {
+      "name": "Omletă simplă (2 ouă + puțin ulei)",
+      "calories": 240,
+      "proteins": 19.0,
+      "carbs": 1.0,
+      "fats": 18.0,
+      "fiber": 0.0,
+      "portion_size": 120.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 3,
+    "fields": {
+      "name": "Iaurt grecesc 10% grăsime",
+      "calories": 133,
+      "proteins": 9.0,
+      "carbs": 4.0,
+      "fats": 10.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 4,
+    "fields": {
+      "name": "Iaurt grecesc 0% grăsime",
+      "calories": 59,
+      "proteins": 10.0,
+      "carbs": 4.0,
+      "fats": 0.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 5,
+    "fields": {
+      "name": "Brânză cottage 2% grăsime",
+      "calories": 84,
+      "proteins": 11.0,
+      "carbs": 4.0,
+      "fats": 2.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 6,
+    "fields": {
+      "name": "Fulgi de ovăz (nefiert)",
+      "calories": 379,
+      "proteins": 13.0,
+      "carbs": 66.0,
+      "fats": 7.0,
+      "fiber": 10.0,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 7,
+    "fields": {
+      "name": "Ovăz gătit cu apă",
+      "calories": 71,
+      "proteins": 2.5,
+      "carbs": 12.0,
+      "fats": 1.5,
+      "fiber": 2.0,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 8,
+    "fields": {
+      "name": "Banane",
+      "calories": 89,
+      "proteins": 1.1,
+      "carbs": 23.0,
+      "fats": 0.3,
+      "fiber": 2.6,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 9,
+    "fields": {
+      "name": "Mere",
+      "calories": 52,
+      "proteins": 0.3,
+      "carbs": 14.0,
+      "fats": 0.2,
+      "fiber": 2.4,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 10,
+    "fields": {
+      "name": "Afine proaspete",
+      "calories": 57,
+      "proteins": 0.7,
+      "carbs": 14.0,
+      "fats": 0.3,
+      "fiber": 2.4,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 11,
+    "fields": {
+      "name": "Unt de arahide natural",
+      "calories": 588,
+      "proteins": 25.0,
+      "carbs": 20.0,
+      "fats": 50.0,
+      "fiber": 9.0,
+      "portion_size": 100.0,
+      "meal_type": "mic_dejun"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 12,
+    "fields": {
+      "name": "Piept de pui la grătar",
+      "calories": 165,
+      "proteins": 31.0,
+      "carbs": 0.0,
+      "fats": 3.6,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 13,
+    "fields": {
+      "name": "Piept de curcan la cuptor",
+      "calories": 135,
+      "proteins": 30.0,
+      "carbs": 0.0,
+      "fats": 1.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 14,
+    "fields": {
+      "name": "Somon la cuptor",
+      "calories": 206,
+      "proteins": 22.0,
+      "carbs": 0.0,
+      "fats": 13.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 15,
+    "fields": {
+      "name": "Ton în suc propriu (scurs)",
+      "calories": 116,
+      "proteins": 25.0,
+      "carbs": 0.0,
+      "fats": 1.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 16,
+    "fields": {
+      "name": "Cod fiert/abur",
+      "calories": 105,
+      "proteins": 23.0,
+      "carbs": 0.0,
+      "fats": 1.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 17,
+    "fields": {
+      "name": "Tilapia la cuptor",
+      "calories": 96,
+      "proteins": 20.0,
+      "carbs": 0.0,
+      "fats": 1.7,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "cina"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 18,
+    "fields": {
+      "name": "Carne slabă de vită (mușchi)",
+      "calories": 250,
+      "proteins": 26.0,
+      "carbs": 0.0,
+      "fats": 15.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 19,
+    "fields": {
+      "name": "Năut fiert",
+      "calories": 164,
+      "proteins": 9.0,
+      "carbs": 27.0,
+      "fats": 2.6,
+      "fiber": 7.6,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 20,
+    "fields": {
+      "name": "Linte fiartă",
+      "calories": 116,
+      "proteins": 9.0,
+      "carbs": 20.0,
+      "fats": 0.4,
+      "fiber": 8.0,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 21,
+    "fields": {
+      "name": "Quinoa gătită",
+      "calories": 120,
+      "proteins": 4.4,
+      "carbs": 21.0,
+      "fats": 1.9,
+      "fiber": 2.8,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 22,
+    "fields": {
+      "name": "Orez alb gătit",
+      "calories": 130,
+      "proteins": 2.7,
+      "carbs": 28.0,
+      "fats": 0.3,
+      "fiber": 0.4,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 23,
+    "fields": {
+      "name": "Orez brun gătit",
+      "calories": 112,
+      "proteins": 2.6,
+      "carbs": 23.0,
+      "fats": 0.9,
+      "fiber": 1.8,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 24,
+    "fields": {
+      "name": "Cartofi dulci copți",
+      "calories": 90,
+      "proteins": 2.0,
+      "carbs": 21.0,
+      "fats": 0.2,
+      "fiber": 3.3,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 25,
+    "fields": {
+      "name": "Broccoli fiert",
+      "calories": 35,
+      "proteins": 2.8,
+      "carbs": 7.0,
+      "fats": 0.4,
+      "fiber": 3.3,
+      "portion_size": 100.0,
+      "meal_type": "pranz"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 26,
+    "fields": {
+      "name": "Avocado",
+      "calories": 160,
+      "proteins": 2.0,
+      "carbs": 9.0,
+      "fats": 15.0,
+      "fiber": 7.0,
+      "portion_size": 100.0,
+      "meal_type": "gustare1"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 27,
+    "fields": {
+      "name": "Migdale crude",
+      "calories": 579,
+      "proteins": 21.0,
+      "carbs": 22.0,
+      "fats": 50.0,
+      "fiber": 12.0,
+      "portion_size": 100.0,
+      "meal_type": "gustare1"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 28,
+    "fields": {
+      "name": "Nuci crude",
+      "calories": 654,
+      "proteins": 15.0,
+      "carbs": 14.0,
+      "fats": 65.0,
+      "fiber": 9.0,
+      "portion_size": 100.0,
+      "meal_type": "gustare1"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 29,
+    "fields": {
+      "name": "Semințe de chia",
+      "calories": 486,
+      "proteins": 17.0,
+      "carbs": 42.0,
+      "fats": 31.0,
+      "fiber": 34.0,
+      "portion_size": 100.0,
+      "meal_type": "gustare1"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 30,
+    "fields": {
+      "name": "Hummus clasic",
+      "calories": 166,
+      "proteins": 8.0,
+      "carbs": 20.0,
+      "fats": 9.0,
+      "fiber": 6.0,
+      "portion_size": 100.0,
+      "meal_type": "gustare2"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 31,
+    "fields": {
+      "name": "Brânză feta",
+      "calories": 264,
+      "proteins": 14.0,
+      "carbs": 4.0,
+      "fats": 21.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "gustare2"
+    }
+  },
+  {
+    "model": "core.dish",
+    "pk": 32,
+    "fields": {
+      "name": "Mozarella light",
+      "calories": 254,
+      "proteins": 24.0,
+      "carbs": 6.0,
+      "fats": 15.0,
+      "fiber": 0.0,
+      "portion_size": 100.0,
+      "meal_type": "gustare2"
+    }
+  }
+  
+]

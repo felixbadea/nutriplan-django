@@ -1,0 +1,118 @@
+<!-- core/templates/core/plan_result.html -->
+ 
+{% load humanize %}
+
+<div class="mt-5">
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header text-white text-center py-5"
+            style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+            <h1 class="mb-0 fw-bold display-5">Planul tău de {{ plan.daily_calories|intcomma }} kcal/zi</h1>
+            <p class="mb-0 mt-2 fs-4">Macro: {{ plan.macro_ratio.name }}</p>
+            {% if plan.bmi %}
+            <p class="mb-0 fs-5">BMI actual: <strong>{{ plan.bmi }}</strong></p>
+            {% endif %}
+        </div>
+
+        <div class="card-body p-5">
+
+            <!-- Rezumat macronutrienți -->
+            <div class="row text-center g-4 mb-5">
+                <div class="col-6 col-md-3">
+                    <div class="p-4 rounded-3 bg-primary bg-opacity-10">
+                        <h3 class="fw-bold text-primary">{{ plan.proteins }}g</h3>
+                        <p class="mb-0">Proteine</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-4 rounded-3 bg-success bg-opacity-10">
+                        <h3 class="fw-bold text-success">{{ plan.carbs }}g</h3>
+                        <p class="mb-0">Carbohidrați</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-4 rounded-3 bg-warning bg-opacity-10">
+                        <h3 class="fw-bold text-warning">{{ plan.fats }}g</h3>
+                        <p class="mb-0">Grăsimi</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-4 rounded-3 bg-info bg-opacity-10">
+                        <h3 class="fw-bold text-info">{{ plan.fiber }}g</h3>
+                        <p class="mb-0">Fibre</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planul pe zile -->
+            {% for day_name, day_meals in plan.meals.items %}
+            <div class="card mb-4 border-start border-success border-5 shadow-sm">
+                <div class="card-header bg-success text-white fw-bold fs-5">
+                    {{ day_name }}
+                </div>
+                <div class="card-body">
+
+                    {% for meal_name, dishes in day_meals.items %}
+                    <div class="mb-4">
+                        <h5 class="text-primary fw-bold border-bottom pb-2 mb-3">
+                            {{ meal_name }}
+                        </h5>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Aliment</th>
+                                        <th class="text-end">Cantitate</th>
+                                        <th class="text-end">Kcal</th>
+                                        <th class="text-end">P</th>
+                                        <th class="text-end">C</th>
+                                        <th class="text-end">G</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dish in dishes %}
+                                    <tr {% if dish.is_past %}class="text-muted opacity-50" {% endif %}>
+                                        <td>
+                                            {% if dish.is_past %}
+                                            <s>{{ dish.name }}</s>
+                                            {% else %}
+                                            <strong>{{ dish.name }}</strong>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end fw-bold text-success">
+                                            {% if not dish.is_past %}{{ dish.grams }}g{% endif %}
+                                        </td>
+                                        <td class="text-end">{{ dish.calories }}</td>
+                                        <td class="text-end text-success fw-bold">{{ dish.proteins }}g</td>
+                                        <td class="text-end text-warning fw-bold">{{ dish.carbs }}g</td>
+                                        <td class="text-end text-danger fw-bold">{{ dish.fats }}g</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Butoane finale -->
+            <div class="text-center mt-5">
+                {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn btn-success btn-lg px-5 me-3">
+                    Salvează în cont
+                </a>
+                {% endif %}
+                <button onclick="window.print()" class="btn btn-outline-primary btn-lg px-5">
+                    Tipărește / Salvează PDF
+                </button>
+            </div>
+
+            <div class="text-center mt-4 text-muted small">
+                Plan generat pe NutriPlan • {{ "now"|date:"d M Y H:i" }}
+            </div>
+        </div>
+    </div>
+</div>

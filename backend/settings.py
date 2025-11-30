@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv(), default='localhost')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
