@@ -1,29 +1,34 @@
-# NutriPlan - Plan Alimentar Personalizat
+# NutriPlan – Plan alimentar personalizat inteligent
 
-Aplicație Django cu:
+Generare automată de plan alimentar pe 7 zile, cu:
 
-- Calcul BMI
-- Greutate țintă + progres
-- Grafic evoluție
-- Notificări email la 90%
-- Autentificare completă
+- Calcule precise după greutate, înălțime, activitate și greutate țintă
+- Macros personalizate (High Protein, Balanced, Low Carb etc.)
+- Start dinamic: planul începe exact de la masa următoare (ex: ora 17:48 → începe cu Cina)
+- Cantități exacte în grame pentru fiecare aliment
+- Mesele trecute apar tăiate automat
+- Interfață modernă cu HTMX + Bootstrap 5
 
-## Instalare
+### Demo live (în curând)
+
+https://nutriplan.ro (coming soon)
+
+### Tehnologii
+
+- Django 5.1 + DRF
+- PostgreSQL
+- HTMX + Bootstrap 5
+- Python 3.11+
+
+### Cum rulezi local
 
 ```bash
-git clone https://github.com/tu-user/nutriplan-django.git
+git clone https://github.com/felixbadea/nutriplan-django.git
 cd nutriplan-django
-cp env/.env.example .env
-# editează .env cu SECRET_KEY, email etc.
+python -m venv venv
+venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
+python manage.py loaddata dishes
 python manage.py runserver
 ```
-
-Tehnologii
-
-Django 5
-Bootstrap 5
-Chart.js
-python-decouple
-Gmail SMTP

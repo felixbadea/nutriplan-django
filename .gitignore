@@ -27,14 +27,17 @@ env_*/
 media/
 staticfiles/
 
-# PyCharm
-.idea/
 
-# VS Code
+# IDE
 .vscode/
+.idea/
+*.sublime-*
 
 # Mac
 .DS_Store
 
 # Windows
 Thumbs.db
+
+# Logs
+*.log

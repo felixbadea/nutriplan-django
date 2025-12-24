@@ -7,94 +7,98 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, CreateView, FormView, ListView
 from django.urls import reverse_lazy
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseNotFound
 from django.template.loader import render_to_string
 
-from .models import MealPlan, MacroRatio
+from .models import MealPlan, MacroRatio, Restaurant
+from .forms import MealPlanForm
 from core.services import generate_meal_plan
 
 
-# ==================== HOME + HTMX GENERARE PLAN ====================
+# ==================== MIXIN PENTRU RESTAURANT ====================
+class RestaurantRequiredMixin:
+    """
+    Mixin care validează slug-ul restaurantului și îl atașează la request.
+    """
+    def dispatch(self, request, *args, **kwargs):
+        restaurant_slug = kwargs.get('restaurant_slug')
+        if not restaurant_slug:
+            return HttpResponseNotFound("Restaurant negăsit.")
+
+        try:
+            restaurant = Restaurant.objects.get(slug=restaurant_slug, is_active=True)
+        except Restaurant.DoesNotExist:
+            return HttpResponseNotFound("Restaurantul nu există sau nu este activ.")
+
+        request.current_restaurant = restaurant
+        return super().dispatch(request, *args, **kwargs)
+
+
+# ==================== HOME VIEW ====================
 class HomeView(TemplateView):
     template_name = 'core/home.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['macro_ratios'] = MacroRatio.objects.all().order_by('name')
+        context['form'] = MealPlanForm()
+
+        restaurant_slug = self.kwargs.get('restaurant_slug')
+        if restaurant_slug:
+            try:
+                restaurant = Restaurant.objects.get(slug=restaurant_slug, is_active=True)
+                context['restaurant'] = restaurant
+                self.request.current_restaurant = restaurant
+            except Restaurant.DoesNotExist:
+                context['restaurant'] = None
+        else:
+            context['restaurants'] = Restaurant.objects.filter(is_active=True).order_by('name')
+
         return context
 
 
+# ==================== GENERARE PLAN HTMX ====================
 def generate_plan_htmx(request):
     if request.method != "POST":
         return HttpResponse('')
 
-    try:
-        # === Preluare și validare date ===
-        age = int(request.POST['age'])
-        gender = request.POST['gender']
-        weight = float(request.POST['weight'])
-        height = request.POST.get('height')
-        height = float(height) if height else None
-        target_weight = request.POST.get('target_weight')
-        target_weight = float(target_weight) if target_weight else None
-        activity_level = request.POST['activity_level']
-        macro_ratio = MacroRatio.objects.get(id=request.POST['macro_ratio'])
+    restaurant = getattr(request, 'current_restaurant', None)
+    if not restaurant:
+        return HttpResponse("Restaurant negăsit.", status=400)
 
-        input_data = {
-            'age': age,
-            'gender': gender,
-            'weight': weight,
-            'height': height,
-            'activity_level': activity_level,
-            'macro_ratio': macro_ratio,
-            'target_weight': target_weight,
-        }
-
-        # === Generare plan ===
-        plan_data = generate_meal_plan(input_data, user=request.user if request.user.is_authenticated else None)
-
-        # === SALVARE AUTOMATĂ dacă utilizatorul e logat ===
-        if request.user.is_authenticated:
-            bmi_value = round(weight / ((height / 100) ** 2), 1) if height else None
-            
-            MealPlan.objects.create(
-                user=request.user,
-                macro_ratio=macro_ratio,
-                daily_calories=plan_data['daily_calories'],
-                proteins=plan_data['macros']['proteins'],
-                carbs=plan_data['macros']['carbs'],
-                fats=plan_data['macros']['fats'],
-                fiber=plan_data['macros']['fiber'],
-                bmi=bmi_value,
-                target_weight=target_weight,
-                user_snapshot={
-                    'age': age,
-                    'gender': gender,
-                    'weight': weight,
-                    'height': height,
-                    'activity_level': activity_level,
-                }
-            )
-
-        # === Returnăm HTML-ul frumos ===
-        html = render_to_string('core/partials/plan_result.html', {'plan': plan_data}, request=request)
+    form = MealPlanForm(request.POST)
+    if not form.is_valid():
+        html = render_to_string('core/partials/form_errors.html', {'form': form}, request=request)
         return HttpResponse(html)
 
-    except Exception as e:
-        return HttpResponse(f'''
-            <div class="alert alert-danger text-center p-5 rounded-3 shadow">
-                <h4>Eroare la generarea planului</h4>
-                <p class="mb-0">{str(e)}</p>
-            </div>
-        ''', content_type='text/html')
+    cleaned_data = form.cleaned_data
+    cleaned_data['macro_ratio'] = form.cleaned_data['macro_ratio']
+
+    plan_data = generate_meal_plan(
+        data=cleaned_data,
+        user=request.user if request.user.is_authenticated else None,
+        restaurant=restaurant
+    )
+
+    if request.user.is_authenticated:
+        template = 'core/partials/plan_saved.html'
+    else:
+        template = 'core/partials/plan_generated.html'
+
+    html = render_to_string(template, {
+        'plan_data': plan_data,
+        'restaurant': restaurant,
+        'user': request.user
+    }, request=request)
+
+    return HttpResponse(html)
 
 
 # ==================== DASHBOARD ====================
 class DashboardView(LoginRequiredMixin, ListView):
-    model = MealPlan
     template_name = 'core/dashboard.html'
     context_object_name = 'plans'
-    paginate_by = 10
+    paginate_by = 12
 
     def get_queryset(self):
         return MealPlan.objects.filter(user=self.request.user).order_by('-created_at')
@@ -102,6 +106,10 @@ class DashboardView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['total_plans'] = self.get_queryset().count()
+
+        if hasattr(self.request, 'current_restaurant'):
+            context['restaurant'] = self.request.current_restaurant
+
         return context
 
 
@@ -109,15 +117,14 @@ class DashboardView(LoginRequiredMixin, ListView):
 @login_required
 def plan_detail_view(request, plan_id):
     plan = get_object_or_404(MealPlan, id=plan_id, user=request.user)
-    
-    # AICI ERA PROBLEMA: tu trimiteai doar macro-urile, dar template-ul așteaptă MESSELE!
-    # Soluția: folosim user_snapshot (pe care îl salvăm în services.py)
+    plan_data = plan.user_snapshot
 
-    plan_data = plan.user_snapshot  # ← AICI e TOTUL: mesele, zilele, alimentele!
+    restaurant = getattr(request, 'current_restaurant', None)
 
     return render(request, 'core/plan_detail.html', {
-        'plan': plan,         # obiectul MealPlan (pentru daily_calories, created_at etc.)
-        'plan_data': plan_data,  # tot planul cu mesele pe zile (exact ce ai generat la început)
+        'plan': plan,
+        'plan_data': plan_data,
+        'restaurant': restaurant,
     })
 
 
@@ -127,16 +134,34 @@ class RegisterView(CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('dashboard')
 
+    def dispatch(self, request, *args, **kwargs):
+        restaurant = getattr(request, 'current_restaurant', None)
+        if not restaurant:
+            return HttpResponseNotFound("Restaurant negăsit.")
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
+        # Atribuim temporar restaurantul pentru signal
+        form.instance._restaurant_to_assign = self.request.current_restaurant
         response = super().form_valid(form)
         login(self.request, self.object)
         return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['restaurant'] = getattr(self.request, 'current_restaurant', None)
+        return context
 
 
 class LoginView(FormView):
     template_name = 'core/login.html'
     form_class = AuthenticationForm
     success_url = reverse_lazy('dashboard')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['restaurant'] = getattr(self.request, 'current_restaurant', None)
+        return context
 
     def form_valid(self, form):
         login(self.request, form.get_user())
@@ -146,4 +171,7 @@ class LoginView(FormView):
 @login_required
 def logout_view(request):
     logout(request)
+    restaurant = getattr(request, 'current_restaurant', None)
+    if restaurant:
+        return redirect('/')
     return redirect('home')

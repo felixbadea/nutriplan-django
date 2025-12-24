@@ -1,24 +1,81 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}Generator Plan Alimentar{% endblock %}
+{% block title %}
+{% if restaurant %}
+Plan alimentar – {{ restaurant.name }} | NutriPlan
+{% else %}
+NutriPlan – Alege restaurantul tău
+{% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">
+
+    {% if restaurants %}
+    <!-- ==================== LANDING PRINCIPAL (/) – LISTĂ RESTAURANTE ==================== -->
+    <div class="text-center mb-5 py-5">
+        <h1 class="display-4 fw-bold text-primary mb-4">Bine ai venit la NutriPlan</h1>
+        <p class="lead text-muted fs-4">Planuri alimentare personalizate pentru clienții restaurantelor partenere</p>
+        <p class="text-muted">Alege restaurantul tău și începe călătoria spre o alimentație mai bună!</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for rest in restaurants %}
+        <div class="col">
+            <div class="card h-100 shadow-sm hover-shadow transition border-0">
+                <div class="card-body text-center p-4">
+                    {% if rest.logo %}
+                    <img src="{{ rest.logo.url }}" alt="{{ rest.name }}" class="rounded-circle mb-3"
+                        style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #667eea;">
+                    {% else %}
+                    <div class="bg-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center text-white fw-bold"
+                        style="width: 120px; height: 120px; font-size: 2.5rem;">
+                        {{ rest.name|slice:":1"|upper }}
+                    </div>
+                    {% endif %}
+
+                    <h3 class="card-title h4 mb-3">{{ rest.name }}</h3>
+
+                    {% if rest.description %}
+                    <p class="text-muted small mb-4">{{ rest.description|truncatewords:20 }}</p>
+                    {% else %}
+                    <p class="text-muted small mb-4">Planuri alimentare personalizate</p>
+                    {% endif %}
+
+                    <a href="/{{ rest.slug }}/" class="btn btn-primary btn-lg px-5 shadow-sm">
+                        Intră în {{ rest.name }}
+                    </a>
+                </div>
+                <div class="card-footer bg-transparent text-muted small">
+                    Restaurant partener NutriPlan
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5 col-12">
+            <p class="text-muted fs-5">Momentan nu există restaurante disponibile.</p>
+            <p class="text-muted">Contactează-ne pentru parteneriat!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- ==================== PAGINA RESTAURANTULUI SPECIFIC – FORMULAR ==================== -->
     <div class="row justify-content-center">
         <div class="col-lg-9">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
                 <div class="card-header text-white text-center py-5"
                     style="background: linear-gradient(135deg, #667eea, #764ba2);">
                     <h1 class="mb-0 fw-bold display-5">Planul tău alimentar personalizat</h1>
-                    <p class="mb-0 mt-2 fs-5 opacity-90">Calculat 100% după nevoile tale</p>
+                    <p class="mb-0 mt-2 fs-4">Pentru {{ restaurant.name }}</p>
                 </div>
 
                 <div class="card-body p-5">
                     <form hx-post="{% url 'generate-plan' %}" hx-target="#plan-result" hx-swap="innerHTML"
                         hx-indicator="#loading" class="needs-validation" novalidate>
-
                         {% csrf_token %}
+
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Vârsta</label>
@@ -34,41 +91,50 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Greutate (kg)</label>
-                                <input type="number" step="0.1" name="weight" class="form-control form-control-lg"
-                                    required placeholder="ex: 78.5">
+                                <input type="number" name="weight" step="0.1" min="30" max="200"
+                                    class="form-control form-control-lg" required placeholder="ex: 75.5">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Înălțime (cm) <small
-                                        class="text-muted">(opțional)</small></label>
-                                <input type="number" name="height" class="form-control form-control-lg"
-                                    placeholder="ex: 175">
+                                <label class="form-label fw-semibold">Înălțime (cm) – opțional</label>
+                                <input type="number" name="height" step="1" min="100" max="250"
+                                    class="form-control form-control-lg" placeholder="ex: 175">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Greutate țintă (kg) <small
-                                        class="text-muted">(opțional)</small></label>
-                                <input type="number" step="0.1" name="target_weight"
-                                    class="form-control form-control-lg" placeholder="ex: 70">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Nivel de activitate</label>
+                                <label class="form-label fw-semibold">Nivel activitate</label>
                                 <select name="activity_level" class="form-select form-control-lg" required>
                                     <option value="sedentary">Sedentar</option>
-                                    <option value="light">Ușoară</option>
-                                    <option value="moderate">Moderată</option>
-                                    <option value="active">Intensă</option>
+                                    <option value="light">Activitate ușoară</option>
+                                    <option value="moderate">Activitate moderată</option>
+                                    <option value="active">Activitate intensă</option>
                                     <option value="very_active">Foarte intensă</option>
                                 </select>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Tip dietă / Raport macro</label>
-                                <select name="macro_ratio" class="form-select form-control-lg" required id="macro-select">
-                                    <option value="" disabled selected>Alege raportul macronutrienți</option>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Raport macronutrienți</label>
+                                <select name="macro_ratio" id="macro-select" class="form-select form-control-lg"
+                                    required>
                                     {% for ratio in macro_ratios %}
-                                    <option value="{{ ratio.id }}">
-                                        {{ ratio.name }} → P:{{ ratio.proteins }}% | C:{{ ratio.carbs }}% | G:{{ ratio.fats }}%
+                                    <option value="{{ ratio.id }}" data-desc="{{ ratio.description|default:"" }}"
+                                        data-fiber="{{ ratio.fiber_recommendation }}">
+                                        {{ ratio.name }} → P:{{ ratio.proteins }}% | C:{{ ratio.carbs }}% | G:{{
+                                        ratio.fats }}%
                                     </option>
                                     {% endfor %}
                                 </select>
+
+                                <!-- Descriere macro – se activează prin JS din global.js -->
+                                <div id="macro-desc" class="macro-desc p-3 mt-3 rounded"
+                                    style="display: none; background: #f8f9fa;">
+                                    <p id="desc-text" class="lead mb-2"></p>
+                                    <p class="small text-muted mb-0">
+                                        <strong>Fibre recomandate:</strong> <span id="fiber-info">14g / 1000 kcal</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Greutate țintă (kg) – opțional</label>
+                                <input type="number" name="target_weight" step="0.1" min="40" max="150"
+                                    class="form-control form-control-lg" placeholder="ex: 70">
                             </div>
                         </div>
 
@@ -89,22 +155,18 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    document.getElementById('macro-select')?.addEventListener('change', function () {
-        const desc = this.selectedOptions[0].dataset.desc;
-        const fiber = this.selectedOptions[0].dataset.fiber;
-        const info = document.getElementById('macro-info');
-        if (desc) {
-            document.getElementById('macro-desc').textContent = desc;
-            document.getElementById('fiber-text').textContent = fiber;
-            info.style.display = 'block';
-        } else {
-            info.style.display = 'none';
-        }
-    });
-</script>
+<!-- Stiluri hover pentru cardurile de restaurante -->
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+
+    .hover-shadow:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2) !important;
+    }
+</style>
 {% endblock %}

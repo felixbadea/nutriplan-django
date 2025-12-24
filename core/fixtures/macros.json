@@ -1,0 +1,86 @@
+[
+  {
+    "model": "core.macroratio",
+    "pk": 1,
+    "fields": {
+      "name": "Echilibrat Standard",
+      "proteins": 30,
+      "carbs": 45,
+      "fats": 25,
+      "fiber_recommendation": "30g / zi",
+      "description": "Raport clasic recomandat de majoritatea ghidurilor nutriționale. Bun pentru menținere și sănătate generală."
+    }
+  },
+  {
+    "model": "core.macroratio",
+    "pk": 2,
+    "fields": {
+      "name": "High Protein (Slăbire)",
+      "proteins": 35,
+      "carbs": 35,
+      "fats": 30,
+      "fiber_recommendation": "35g / zi",
+      "description": "Mai multe proteine pentru sațietate și păstrare masă musculară în deficit caloric. Ideal pentru slăbire."
+    }
+  },
+  {
+    "model": "core.macroratio",
+    "pk": 3,
+    "fields": {
+      "name": "Low Carb (Cetogenic Light)",
+      "proteins": 30,
+      "carbs": 20,
+      "fats": 50,
+      "fiber_recommendation": "25-30g / zi",
+      "description": "Reducere carbohidrați, creștere grăsimi sănătoase. Potrivit pentru control glicemic și energie stabilă."
+    }
+  },
+  {
+    "model": "core.macroratio",
+    "pk": 4,
+    "fields": {
+      "name": "Zone Diet (40/30/30)",
+      "proteins": 30,
+      "carbs": 40,
+      "fats": 30,
+      "fiber_recommendation": "30g / zi",
+      "description": "Raport echilibrat celebru (Dr. Barry Sears). Bun pentru control hormonal și performanță."
+    }
+  },
+  {
+    "model": "core.macroratio",
+    "pk": 5,
+    "fields": {
+      "name": "High Carb (Sportivi Endurance)",
+      "proteins": 25,
+      "carbs": 60,
+      "fats": 15,
+      "fiber_recommendation": "35-40g / zi",
+      "description": "Multă energie din carbohidrați pentru antrenamente intense și recuperare glicogen."
+    }
+  },
+  {
+    "model": "core.macroratio",
+    "pk": 6,
+    "fields": {
+      "name": "Moderate Carb (Recomp)",
+      "proteins": 30,
+      "carbs": 40,
+      "fats": 30,
+      "fiber_recommendation": "32g / zi",
+      "description": "Echilibru bun pentru cei care vor să ardă grăsime și să construiască masă musculară simultan."
+    }
+  },
+  {
+    "model": "core.macroratio",
+    "pk": 7,
+    "fields": {
+      "name": "Paleo-Inspired",
+      "proteins": 35,
+      "carbs": 25,
+      "fats": 40,
+      "fiber_recommendation": "35g / zi",
+      "description": "Inspirat din alimentația ancestrală: proteine și grăsimi ridicate, carbohidrați din surse naturale."
+    }
+  }
+]

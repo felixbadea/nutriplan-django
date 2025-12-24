@@ -62,3 +62,32 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => new bootstrap.Alert(alert).close(), 5000);
     });
 });
+
+// Actualizare descriere macro când se schimbă selecția (doar în formular)
+document.addEventListener('DOMContentLoaded', function () {
+    const macroSelect = document.getElementById('macro-select');
+    if (macroSelect) {
+        const descDiv = document.getElementById('macro-desc');
+        const descText = document.getElementById('desc-text');
+        const fiberInfo = document.getElementById('fiber-info');
+
+        if (descDiv && descText && fiberInfo) {
+            function updateDescription() {
+                const selected = macroSelect.options[macroSelect.selectedIndex];
+                const desc = selected.dataset.desc || "";
+                const fiber = selected.dataset.fiber || "14g / 1000 kcal";
+
+                if (desc) {
+                    descText.innerHTML = `<strong>${selected.text.split(' →')[0]}:</strong> ${desc}`;
+                    fiberInfo.textContent = fiber;
+                    descDiv.style.display = 'block';
+                } else {
+                    descDiv.style.display = 'none';
+                }
+            }
+
+            macroSelect.addEventListener('change', updateDescription);
+            updateDescription(); // la încărcare inițială
+        }
+    }
+});

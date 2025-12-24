@@ -21,13 +21,19 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from core.views import HomeView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),        # pagina principală
-    path('api/', include('core.api.urls')), # API-ul DRF
+    path('api/', include('core.api.urls')),
+
+    # Pagina principală – landing cu lista de restaurante
+    path('', HomeView.as_view(), name='home'),
+
+    # Toate restaurantele – include core.urls cu prefix slug
+    path('<str:restaurant_slug>/', include('core.urls')),
 ]
 
-# Pentru development (imagini, static)
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

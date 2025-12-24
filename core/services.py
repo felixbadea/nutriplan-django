@@ -1,7 +1,7 @@
-# core/services.py
 import random
 from datetime import datetime, timedelta
-from core.models import Dish, MacroRatio, MealPlan
+from django.db import models
+from core.models import Dish, MacroRatio, MealPlan, Restaurant
 
 
 # ==================== CONFIGURAȚII ====================
@@ -45,7 +45,6 @@ def get_meal_start_info():
     now = datetime.now()
     current_time = now.hour + now.minute / 60.0
 
-    # Intervane orare realiste (ajustabile)
     if current_time < 9.5:          # până la 09:30
         return "Mic Dejun", 0, "Azi"
     elif current_time < 11.0:       # până la 11:00
@@ -123,12 +122,23 @@ def calculate_macros(daily_calories, macro_ratio):
     return proteins, carbs, fats, fiber
 
 
-def get_dishes_for_meal(meal_type_db):
-    return list(Dish.objects.filter(is_active=True, meal_type=meal_type_db).order_by('?')[:12])
+def get_dishes_for_meal(meal_type_db, restaurant):
+    """
+    Returnează maxim 12 feluri active pentru tipul de masă,
+    doar din restaurantul curent sau cele default (globale).
+    """
+    return list(
+        Dish.objects.filter(
+            models.Q(restaurant=restaurant) | models.Q(is_default=True),
+            is_active=True,
+            meal_type=meal_type_db
+        )
+        .order_by('?')[:12]
+    )
 
 
-def select_and_scale_dishes(meal_type_db, target_calories, target_p, target_c, target_f):
-    candidates = get_dishes_for_meal(meal_type_db)
+def select_and_scale_dishes(meal_type_db, target_calories, target_p, target_c, target_f, restaurant):
+    candidates = get_dishes_for_meal(meal_type_db, restaurant)
     if not candidates:
         return [{
             "name": "Opțiune manuală recomandată",
@@ -166,7 +176,7 @@ def select_and_scale_dishes(meal_type_db, target_calories, target_p, target_c, t
 
 
 # ==================== GENERARE PLAN COMPLET ====================
-def generate_weekly_meals(daily_calories, total_proteins, total_carbs, total_fats):
+def generate_weekly_meals(daily_calories, total_proteins, total_carbs, total_fats, restaurant):
     plan = {}
     start_meal_name, days_offset, first_day_label = get_meal_start_info()
     week_days = get_week_days_labels(days_offset, first_day_label)
@@ -198,7 +208,7 @@ def generate_weekly_meals(daily_calories, total_proteins, total_carbs, total_fat
             meal_c = int(total_carbs * cal_pct)
             meal_f = int(total_fats * cal_pct)
 
-            dishes = select_and_scale_dishes(meal_type_db, meal_cal, meal_p, meal_c, meal_f)
+            dishes = select_and_scale_dishes(meal_type_db, meal_cal, meal_p, meal_c, meal_f, restaurant)
             day_meals[display_name] = dishes
 
         plan[day_name] = day_meals
@@ -207,14 +217,28 @@ def generate_weekly_meals(daily_calories, total_proteins, total_carbs, total_fat
     return plan
 
 
-# ==================== FUNCȚIA PRINCIPALĂ ====================
-def generate_meal_plan(data, user=None):
+# ==================== FUNCȚIA PRINCIPALĂ (AJUSTATĂ PENTRU MULTI-RESTAURANT) ====================
+def generate_meal_plan(data, user=None, restaurant=None):
+    """
+    Generează planul alimentar personalizat.
+    
+    Args:
+        data (dict): Datele din formular (age, gender, weight etc.)
+        user (User, optional): Utilizatorul autentificat
+        restaurant (Restaurant): Restaurantul curent – OBLIGATORIU pentru multi-tenant
+    
+    Returns:
+        dict: Planul generat + metadate
+    """
+    if restaurant is None:
+        raise ValueError("Restaurantul este obligatoriu pentru generarea planului.")
+
     daily_calories = calculate_daily_calories(data)
     bmi = calculate_bmi(data['weight'], data.get('height'))
     macro_ratio = data['macro_ratio']
 
     proteins, carbs, fats, fiber = calculate_macros(daily_calories, macro_ratio)
-    meals = generate_weekly_meals(daily_calories, proteins, carbs, fats)
+    meals = generate_weekly_meals(daily_calories, proteins, carbs, fats, restaurant)
 
     saved_plan = None
     if user and user.is_authenticated:
@@ -242,6 +266,8 @@ def generate_meal_plan(data, user=None):
                 "fiber": fiber,
                 "meals": meals,
                 "generated_at": datetime.now().isoformat(),
+                "restaurant_id": restaurant.id,
+                "restaurant_name": restaurant.name,
             }
         )
 

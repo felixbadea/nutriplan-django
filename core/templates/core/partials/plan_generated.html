@@ -1,0 +1,8 @@
+<div class="alert alert-success text-center">
+    <h3>Planul tău a fost generat cu succes!</h3>
+    <p>Calorii zilnice: {{ plan_data.daily_calories }} kcal</p>
+    <p>Proteine: {{ plan_data.proteins }}g | Carbohidrați: {{ plan_data.carbs }}g | Grăsimi: {{ plan_data.fats }}g</p>
+    <p>Fibre: {{ plan_data.fiber }}g</p>
+    <hr>
+    <p>Pentru a salva planul, <a href="/{{ restaurant.slug }}/register/">crează un cont gratuit</a>.</p>
+</div>
