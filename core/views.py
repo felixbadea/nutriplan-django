@@ -10,11 +10,31 @@ from django.urls import reverse_lazy
 from django.http import HttpResponse, HttpResponseNotFound
 from django.template.loader import render_to_string
 
-from .models import MealPlan, MacroRatio, Restaurant
+from .models import MealPlan, MacroRatio, Restaurant, Allergen
 from .forms import MealPlanForm
 from core.services import generate_meal_plan
 
+class RestaurantListView(ListView):
+    model = Restaurant
+    template_name = 'core/restaurant_list.html'  # numele template-ului tău pentru lista de restaurante
+    context_object_name = 'restaurants'
+    
+    # Opțional: doar restaurantele active/publicate
+    queryset = Restaurant.objects.filter(is_active=True)  # ajustează după nevoile tale
+    
+    # Opțional: ordonare
+    ordering = ['name']  # sau ['order', 'name'] etc.
 
+class LandingHomeView(TemplateView):
+    template_name = 'core/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['macro_ratios'] = MacroRatio.objects.all().order_by('name')
+        context['allergens'] = Allergen.objects.all().order_by('name')
+        context['restaurants'] = Restaurant.objects.filter(is_active=True).order_by('name')
+        context['restaurant'] = None  # important – să nu creadă că e într-un restaurant
+        return context
 # ==================== MIXIN PENTRU RESTAURANT ====================
 class RestaurantRequiredMixin:
     """
@@ -35,23 +55,20 @@ class RestaurantRequiredMixin:
 
 
 # ==================== HOME VIEW ====================
-class HomeView(TemplateView):
+class HomeView(RestaurantRequiredMixin, TemplateView):
     template_name = 'core/home.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['macro_ratios'] = MacroRatio.objects.all().order_by('name')
+        context['allergens'] = Allergen.objects.all().order_by('name')
         context['form'] = MealPlanForm()
 
-        restaurant_slug = self.kwargs.get('restaurant_slug')
-        if restaurant_slug:
-            try:
-                restaurant = Restaurant.objects.get(slug=restaurant_slug, is_active=True)
-                context['restaurant'] = restaurant
-                self.request.current_restaurant = restaurant
-            except Restaurant.DoesNotExist:
-                context['restaurant'] = None
-        else:
+        # Restaurantul curent este deja setat de mixin
+        context['restaurant'] = getattr(self.request, 'current_restaurant', None)
+
+        # Dacă nu suntem pe un restaurant specific (ex: landing page)
+        if not context['restaurant']:
             context['restaurants'] = Restaurant.objects.filter(is_active=True).order_by('name')
 
         return context
@@ -72,7 +89,7 @@ def generate_plan_htmx(request):
         return HttpResponse(html)
 
     cleaned_data = form.cleaned_data
-    cleaned_data['macro_ratio'] = form.cleaned_data['macro_ratio']
+    cleaned_data['macro_ratio'] = cleaned_data['macro_ratio']  # deja e obiectul
 
     plan_data = generate_meal_plan(
         data=cleaned_data,
@@ -80,10 +97,7 @@ def generate_plan_htmx(request):
         restaurant=restaurant
     )
 
-    if request.user.is_authenticated:
-        template = 'core/partials/plan_saved.html'
-    else:
-        template = 'core/partials/plan_generated.html'
+    template = 'core/partials/plan_saved.html' if request.user.is_authenticated else 'core/partials/plan_generated.html'
 
     html = render_to_string(template, {
         'plan_data': plan_data,
@@ -106,10 +120,7 @@ class DashboardView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['total_plans'] = self.get_queryset().count()
-
-        if hasattr(self.request, 'current_restaurant'):
-            context['restaurant'] = self.request.current_restaurant
-
+        context['restaurant'] = getattr(self.request, 'current_restaurant', None)
         return context
 
 
@@ -118,7 +129,6 @@ class DashboardView(LoginRequiredMixin, ListView):
 def plan_detail_view(request, plan_id):
     plan = get_object_or_404(MealPlan, id=plan_id, user=request.user)
     plan_data = plan.user_snapshot
-
     restaurant = getattr(request, 'current_restaurant', None)
 
     return render(request, 'core/plan_detail.html', {
@@ -129,19 +139,13 @@ def plan_detail_view(request, plan_id):
 
 
 # ==================== AUTH ====================
-class RegisterView(CreateView):
+class RegisterView(RestaurantRequiredMixin, CreateView):
     template_name = 'core/register.html'
     form_class = UserCreationForm
     success_url = reverse_lazy('dashboard')
 
-    def dispatch(self, request, *args, **kwargs):
-        restaurant = getattr(request, 'current_restaurant', None)
-        if not restaurant:
-            return HttpResponseNotFound("Restaurant negăsit.")
-        return super().dispatch(request, *args, **kwargs)
-
     def form_valid(self, form):
-        # Atribuim temporar restaurantul pentru signal
+        # Atribuim temporar restaurantul pentru signal sau membership
         form.instance._restaurant_to_assign = self.request.current_restaurant
         response = super().form_valid(form)
         login(self.request, self.object)
@@ -149,18 +153,18 @@ class RegisterView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['restaurant'] = getattr(self.request, 'current_restaurant', None)
+        context['restaurant'] = self.request.current_restaurant
         return context
 
 
-class LoginView(FormView):
+class LoginView(RestaurantRequiredMixin, FormView):
     template_name = 'core/login.html'
     form_class = AuthenticationForm
     success_url = reverse_lazy('dashboard')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['restaurant'] = getattr(self.request, 'current_restaurant', None)
+        context['restaurant'] = self.request.current_restaurant
         return context
 
     def form_valid(self, form):
@@ -168,10 +172,8 @@ class LoginView(FormView):
         return redirect(self.success_url)
 
 
+# ==================== LOGOUT ====================
 @login_required
 def logout_view(request):
     logout(request)
-    restaurant = getattr(request, 'current_restaurant', None)
-    if restaurant:
-        return redirect('/')
-    return redirect('home')
+    return redirect('landing_home')  # → redirecționează la landing page (/)

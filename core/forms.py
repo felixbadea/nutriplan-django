@@ -1,6 +1,7 @@
 # core\forms.py
 from django import forms
-from .models import MacroRatio
+from .models import MacroRatio, Allergen  # ← Adaugă Allergen
+
 
 class MealPlanForm(forms.Form):
     age = forms.IntegerField(
@@ -34,10 +35,10 @@ class MealPlanForm(forms.Form):
     activity_level = forms.ChoiceField(
         choices=[
             ('sedentary', 'Sedentar'),
-            ('usor', 'Ușoară'),
-            ('moderata', 'Moderată'),
-            ('intensa', 'Intensă'),
-            ('foarte_intensa', 'Foarte intensă'),
+            ('light', 'Activitate ușoară'),
+            ('moderate', 'Activitate moderată'),
+            ('active', 'Activitate intensă'),
+            ('very_active', 'Foarte intensă'),
         ],
         widget=forms.Select(attrs={'class': 'form-select form-select-lg'})
     )
@@ -51,19 +52,20 @@ class MealPlanForm(forms.Form):
             'class': 'form-control form-control-lg',
             'placeholder': 'ex: 70 (opțional)',
             'step': '0.1'
-    })
-)
+        })
+    )
 
-    def clean(self):
-        cleaned_data = super().clean()
-        weight = cleaned_data.get('weight')
-        height = cleaned_data.get('height')
-
-        if weight and height:
-            bmi = weight / ((height / 100) ** 2)
-            cleaned_data['bmi'] = round(bmi, 1)
-            self.bmi = bmi  # pentru view
-        return cleaned_data
+    # ==================== NOI CÂMPURI DIETETICE ====================
+    is_vegan = forms.BooleanField(required=False, initial=False)
+    is_vegetarian = forms.BooleanField(required=False, initial=False)
+    is_raw_vegan = forms.BooleanField(required=False, initial=False)
+    is_gluten_free = forms.BooleanField(required=False, initial=False)
+    is_lactose_free = forms.BooleanField(required=False, initial=False)
+    allergens = forms.ModelMultipleChoiceField(
+        queryset=Allergen.objects.all(),
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class': 'form-select form-select-lg'})
+    )
        
     
    

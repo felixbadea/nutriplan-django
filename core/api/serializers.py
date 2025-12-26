@@ -1,9 +1,8 @@
 # core/api/serializers.py
 from rest_framework import serializers
-from core.models import MacroRatio   
+from core.models import MacroRatio, Allergen
 
 
-# 1. Serializer pentru INPUT (formularul de pe homepage)
 class GenerateMealPlanSerializer(serializers.Serializer):
     gender = serializers.ChoiceField(choices=[('M', 'Masculin'), ('F', 'Feminin')])
     age = serializers.IntegerField(min_value=15, max_value=100)
@@ -20,8 +19,19 @@ class GenerateMealPlanSerializer(serializers.Serializer):
         queryset=MacroRatio.objects.all()
     )
 
+    # Restricții dietetice
+    is_vegan = serializers.BooleanField(default=False, required=False)
+    is_vegetarian = serializers.BooleanField(default=False, required=False)
+    is_raw_vegan = serializers.BooleanField(default=False, required=False)
+    is_gluten_free = serializers.BooleanField(default=False, required=False)
+    is_lactose_free = serializers.BooleanField(default=False, required=False)
+    allergens = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Allergen.objects.all(),
+        required=False
+    )
 
-# 2. Serializer pentru OUTPUT – acum fără erori
+
 class MealPlanResultSerializer(serializers.Serializer):
     success = serializers.BooleanField(default=True)
     message = serializers.CharField(max_length=200)
@@ -32,6 +42,4 @@ class MealPlanResultSerializer(serializers.Serializer):
     fats = serializers.IntegerField()
     fiber = serializers.IntegerField()
     saved_plan_id = serializers.IntegerField(allow_null=True, required=False)
-
-    # FIX: acceptăm orice structură nestedă fără să crape
-    meals = serializers.JSONField()  
+    meals = serializers.JSONField() 

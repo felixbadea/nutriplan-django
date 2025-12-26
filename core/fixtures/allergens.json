@@ -1,0 +1,114 @@
+[
+  {
+    "model": "core.allergen",
+    "pk": 1,
+    "fields": {
+      "name": "Gluten",
+      "description": "Prezent în grâu, secară, orz, ovăz contaminat etc."
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 2,
+    "fields": {
+      "name": "Crustacee",
+      "description": "Creveți, crab, homar, langustă etc."
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 3,
+    "fields": {
+      "name": "Ouă",
+      "description": "Ouă de găină și produse derivate"
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 4,
+    "fields": {
+      "name": "Pește",
+      "description": "Toate speciile de pește"
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 5,
+    "fields": {
+      "name": "Arahide",
+      "description": "Alune de pământ"
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 6,
+    "fields": {
+      "name": "Soia",
+      "description": "Boabe de soia și derivate"
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 7,
+    "fields": {
+      "name": "Lapte",
+      "description": "Lapte și produse lactate (inclusiv lactoză)"
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 8,
+    "fields": {
+      "name": "Nuci",
+      "description": "Migdale, alune de pădure, nuci, caju, pecan, fistic etc."
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 9,
+    "fields": {
+      "name": "Țelină",
+      "description": "Țelină rădăcină și frunze"
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 10,
+    "fields": {
+      "name": "Muștar",
+      "description": "Semințe de muștar și produse derivate"
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 11,
+    "fields": {
+      "name": "Susan",
+      "description": "Semințe de susan"
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 12,
+    "fields": {
+      "name": "Dioxid de sulf și sulfiți",
+      "description": "Conservanți folosiți în vin, fructe uscate etc."
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 13,
+    "fields": {
+      "name": "Lupin",
+      "description": "Făină și semințe de lupin"
+    }
+  },
+  {
+    "model": "core.allergen",
+    "pk": 14,
+    "fields": {
+      "name": "Moluște",
+      "description": "Midii, scoici, stridii, melci etc."
+    }
+  }
+]

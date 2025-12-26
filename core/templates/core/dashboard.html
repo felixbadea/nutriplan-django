@@ -11,7 +11,7 @@
             <p class="text-muted mb-0">Ai salvate {{ plans.count }} plan{{ plans.count|pluralize }} alimentar{{
                 plans.count|pluralize:",e" }}</p>
         </div>
-        <a href="{% url 'home' %}" class="btn btn-primary btn-lg shadow-sm">
+        <a href="{% url 'landing_home' %}" class="btn btn-primary btn-lg shadow-sm">
             <i class="bi bi-plus-circle me-2"></i> Plan nou
         </a>
     </div>
@@ -43,12 +43,12 @@
                     </div>
 
                     <div class="mt-auto">
-                        <!-- Buton Vezi Planul (fără print) -->
+                        <!-- Buton Vezi Planul -->
                         <a href="{% url 'view-plan' plan.id %}" class="btn btn-outline-primary w-100 mb-2">
                             Vezi planul complet
                         </a>
 
-                        <!-- Buton PDF / Tipărire (se deschide în tab nou și apelează print automat) -->
+                        <!-- Buton Tipărire / PDF -->
                         <a href="{% url 'view-plan' plan.id %}?print=1" target="_blank" class="btn btn-success w-100">
                             <i class="bi bi-printer"></i> Tipărește / Salvează PDF
                         </a>
@@ -63,15 +63,15 @@
         <img src="{% static 'img/empty-plans.svg' %}" alt="Fără planuri" class="mb-4"
             style="max-width: 220px; opacity: 0.8;">
         <h3 class="text-muted mt-4">Nu ai niciun plan salvat încă</h3>
-        <p class="text-muted mb-4">Generează-ți primul plan alimentar personalizat în doar în câteva secunde!</p>
-        <a href="{% url 'home' %}" class="btn btn-primary btn-lg px-5">
+        <p class="text-muted mb-4">Generează-ți primul plan alimentar personalizat în doar câteva secunde!</p>
+        <a href="{% url 'landing_home' %}" class="btn btn-primary btn-lg px-5">
             Creează primul meu plan
         </a>
     </div>
     {% endif %}
 </div>
 
-<!-- Hover efect mic pentru carduri -->
+<!-- Hover efect pentru carduri -->
 <style>
     .hover-shadow {
         transition: all 0.3s ease;

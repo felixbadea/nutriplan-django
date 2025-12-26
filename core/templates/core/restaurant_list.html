@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}NutriPlan • Alege Restaurantul{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Bine ai revenit la NutriPlan!</h1>
+        <p class="lead text-muted">Alege restaurantul pentru care vrei să-ți creezi un plan alimentar personalizat</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for restaurant in restaurants %}
+        <div class="col">
+            <a href="{% url 'login' restaurant.slug %}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-shadow transition text-center">
+                    {% if restaurant.logo %}
+                    <img src="{{ restaurant.logo.url }}" class="card-img-top p-4" alt="{{ restaurant.name }}"
+                        style="height: 180px; object-fit: contain;">
+                    {% else %}
+                    <!-- Placeholder frumos dacă nu există logo -->
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                        <span class="text-muted fs-3 fw-bold">{{ restaurant.name|slice:":2"|upper }}</span>
+                    </div>
+                    {% endif %}
+        
+                    <div class="card-body py-4">
+                        <h5 class="card-title fw-bold mb-3">{{ restaurant.name }}</h5>
+                        <p class="btn btn-primary btn-lg px-4">
+                            Selectează și autentifică-te
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted fs-4">Momentan nu sunt disponibile restaurante.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+{% endblock %}

@@ -82,5 +82,17 @@
       "fiber_recommendation": "35g / zi",
       "description": "Inspirat din alimentația ancestrală: proteine și grăsimi ridicate, carbohidrați din surse naturale."
     }
+  },
+  {
+  "model": "core.macroratio",
+  "pk": 8,
+  "fields": {
+    "name": "Vegan Balanced",
+    "proteins": 25,
+    "carbs": 55,
+    "fats": 20,
+    "fiber_recommendation": "40g / zi",
+    "description": "Adaptat pentru surse vegetale, cu fibre ridicate."
   }
+}
 ]

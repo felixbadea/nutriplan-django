@@ -138,6 +138,76 @@ NutriPlan – Alege restaurantul tău
                             </div>
                         </div>
 
+                        <!-- ==================== RESTRICȚII ȘI PREFERINȚE ALIMENTARE ==================== -->
+                        <div class="row g-4 mt-5">
+                            <div class="col-12">
+                                <h5 class="fw-bold text-primary mb-4">Restricții și preferințe alimentare (opțional)
+                                </h5>
+                                <p class="text-muted mb-4">Bifează ce dorești – planul se va adapta automat doar la
+                                    mâncăruri compatibile.</p>
+                            </div>
+
+                            <!-- Checkbox-uri cu switch Bootstrap -->
+                            <div class="col-lg-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="is_vegan" name="is_vegan">
+                                    <label class="form-check-label fw-semibold text-success" for="is_vegan">
+                                        Vegan (fără produse de origine animală)
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="is_vegetarian"
+                                        name="is_vegetarian">
+                                    <label class="form-check-label fw-semibold text-success" for="is_vegetarian">
+                                        Vegetarian
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="is_raw_vegan"
+                                        name="is_raw_vegan">
+                                    <label class="form-check-label fw-semibold text-success" for="is_raw_vegan">
+                                        Raw-Vegan
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="is_gluten_free"
+                                        name="is_gluten_free">
+                                    <label class="form-check-label fw-semibold text-warning" for="is_gluten_free">
+                                        Fără gluten
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="is_lactose_free"
+                                        name="is_lactose_free">
+                                    <label class="form-check-label fw-semibold text-warning" for="is_lactose_free">
+                                        Fără lactoză
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Select multiplu pentru alergeni -->
+                            <div class="col-12">
+                                <label for="allergens" class="form-label fw-semibold text-danger">Alergii
+                                    alimentare</label>
+                                <select name="allergens" id="allergens" class="form-select form-select-lg" multiple
+                                    size="6">
+                                    {% for allergen in allergens %}
+                                    <option value="{{ allergen.id }}">{{ allergen.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text mt-2">
+                                    <small>Ține apăsat <kbd>Ctrl</kbd> (Windows) sau <kbd>Cmd</kbd> (Mac) pentru a
+                                        selecta mai multe alergii.</small>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="text-center mt-5">
                             <button type="submit" class="btn btn-primary btn-lg px-5 shadow-lg">
                                 Generează Planul Meu
@@ -158,15 +228,66 @@ NutriPlan – Alege restaurantul tău
     {% endif %}
 </div>
 
-<!-- Stiluri hover pentru cardurile de restaurante -->
-<style>
-    .hover-shadow {
-        transition: all 0.3s ease;
-    }
 
-    .hover-shadow:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2) !important;
-    }
-</style>
+{% endblock %}
+{% block extra_js %}
+<script>
+    // Validări și logică inteligentă pentru checkbox-urile dietetice
+    document.addEventListener('DOMContentLoaded', function () {
+        const veganCheckbox = document.getElementById('is_vegan');
+        const vegetarianCheckbox = document.getElementById('is_vegetarian');
+        const rawVeganCheckbox = document.getElementById('is_raw_vegan');
+        const glutenFreeCheckbox = document.getElementById('is_gluten_free');
+        const lactoseFreeCheckbox = document.getElementById('is_lactose_free');
+
+        if (!veganCheckbox || !vegetarianCheckbox || !rawVeganCheckbox) return;
+
+        // Funcție helper pentru a actualiza starea
+        function updateDependencies() {
+            if (rawVeganCheckbox.checked) {
+                // Raw-Vegan implică Vegan + Vegetarian + Fără lactoză
+                veganCheckbox.checked = true;
+                vegetarianCheckbox.checked = true;
+                lactoseFreeCheckbox.checked = true;
+            } else if (veganCheckbox.checked) {
+                // Vegan implică Vegetarian + Fără lactoză
+                vegetarianCheckbox.checked = true;
+                lactoseFreeCheckbox.checked = true;
+            }
+        }
+
+        // Evenimente la schimbare
+        rawVeganCheckbox.addEventListener('change', function () {
+            updateDependencies();
+        });
+
+        veganCheckbox.addEventListener('change', function () {
+            if (!veganCheckbox.checked) {
+                // Dacă debifezi Vegan → debifezi Raw-Vegan
+                rawVeganCheckbox.checked = false;
+            }
+            updateDependencies();
+        });
+
+        vegetarianCheckbox.addEventListener('change', function () {
+            if (!vegetarianCheckbox.checked) {
+                // Dacă debifezi Vegetarian → debifezi Vegan și Raw-Vegan
+                veganCheckbox.checked = false;
+                rawVeganCheckbox.checked = false;
+            }
+            updateDependencies();
+        });
+
+        lactoseFreeCheckbox.addEventListener('change', function () {
+            if (veganCheckbox.checked && !lactoseFreeCheckbox.checked) {
+                // Nu poți debifa Fără lactoză dacă ești Vegan
+                lactoseFreeCheckbox.checked = true;
+                alert("Notă: Dieta vegană exclude automat lactoza. Această opțiune rămâne bifată.");
+            }
+        });
+
+        // Inițializare la încărcarea paginii (în caz că utilizatorul revine cu date salvate)
+        updateDependencies();
+    });
+</script>
 {% endblock %}

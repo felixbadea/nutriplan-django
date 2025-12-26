@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ro">
 
@@ -17,21 +18,24 @@
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm"
         style="background: linear-gradient(135deg, #667eea, #764ba2);">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold fs-4" href="/">
+            <!-- Logo + Nume restaurant dacă există -->
+            <a class="navbar-brand fw-bold fs-4" href="{% url 'landing_home' %}">
                 NutriPlan
                 {% if restaurant %}
                 – {{ restaurant.name }}
                 {% endif %}
             </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     {% if user.is_authenticated %}
-                    {% if restaurant %}
-                    <li class="nav-item">
-                        <a href="/{{ restaurant.slug }}/dashboard/" class="btn btn-outline-primary position-relative">
+                    <!-- Dashboard global -->
+                    <li class="nav-item me-3">
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-light position-relative">
                             Planurile Mele
                             {% if user.meal_plans.count > 0 %}
                             <span
@@ -41,50 +45,21 @@
                             {% endif %}
                         </a>
                     </li>
-                    <li class="nav-item dropdown ms-3">
-                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                            {{ user.username }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/{{ restaurant.slug }}/dashboard/">Profil</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <form method="post" action="/{{ restaurant.slug }}/logout/">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item text-danger">Deconectare</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                    {% else %}
+
+                    <!-- Bine ai venit + Deconectare -->
                     <li class="nav-item">
                         <span class="navbar-text text-white me-3">Bine ai venit, {{ user.username }}!</span>
                     </li>
                     <li class="nav-item">
-                        <form method="post" action="/logout/">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-light">Deconectare</button>
-                        </form>
+                        <a href="{% url 'logout' %}" class="btn btn-outline-light">Deconectare</a>
                     </li>
-                    {% endif %}
                     {% else %}
+                    <!-- Login și Register – doar dacă suntem pe un restaurant specific -->
                     {% if restaurant %}
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/{{ restaurant.slug }}/login/">Autentificare</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-light ms-2 px-4"
-                            href="/{{ restaurant.slug }}/register/">Înregistrare</a>
-                    </li>
+                    <a class="nav-link text-white" href="{% url 'login' restaurant.slug %}">Autentificare</a>
                     {% else %}
-                    <li class="nav-item">
-                        <span class="nav-link text-white opacity-75">Autentificare</span>
-                    </li>
-                    <li class="nav-item">
-                        <span class="btn btn-outline-light ms-2 px-4 opacity-75">Înregistrare</span>
-                    </li>
+                    <!-- Opțional: un fallback, ex. login global sau mesaj -->
+                    <a class="nav-link text-white" href="#">Autentificare (necesită restaurant)</a>
                     {% endif %}
                     {% endif %}
                 </ul>

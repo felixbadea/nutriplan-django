@@ -1,3 +1,4 @@
+
 import random
 from datetime import datetime, timedelta
 from django.db import models
@@ -40,6 +41,44 @@ MEAL_TYPE_MAPPING = {
 ROMANIAN_DAYS = ["Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă", "Duminică"]
 
 
+# ==================== FILTRARE DISHES CU CONSTRÂNGERI DIETETICE ====================
+def get_available_dishes(meal_type, restaurant, constraints=None):
+    """
+    Returnează queryset-ul de Dish-uri disponibile pentru un anumit tip de masă,
+    restaurant și constrângeri dietetice specificate de utilizator.
+    """
+    if constraints is None:
+        constraints = {}
+
+    queryset = Dish.objects.filter(
+        meal_type=meal_type,
+        restaurant=restaurant,
+        is_active=True
+    )
+
+    # Aplicăm filtrele dietetice
+    if constraints.get('vegan'):
+        queryset = queryset.filter(is_vegan=True)
+    elif constraints.get('vegetarian'):
+        queryset = queryset.filter(is_vegetarian=True)
+
+    if constraints.get('raw_vegan'):
+        queryset = queryset.filter(is_raw_vegan=True)
+
+    if constraints.get('gluten_free'):
+        queryset = queryset.filter(is_gluten_free=True)
+
+    if constraints.get('lactose_free'):
+        queryset = queryset.filter(is_lactose_free=True)
+
+    # Excludem dish-urile care conțin alergenii selectați
+    allergens = constraints.get('allergens')
+    if allergens:
+        queryset = queryset.exclude(allergens__id__in=allergens)
+
+    return queryset
+
+
 # ==================== ORA CURENTĂ → MASA DE START ====================
 def get_meal_start_info():
     now = datetime.now()
@@ -55,7 +94,7 @@ def get_meal_start_info():
         return "Gustare 2", 0, "Azi"
     elif current_time < 20.5:       # până la 20:30 → Cină
         return "Cină", 0, "Azi"
-    else:                           # după 20:30 → începe mâine
+    else:
         return "Mic Dejun", 1, "Mâine"
 
 
@@ -107,7 +146,7 @@ def calculate_daily_calories(data):
     return int(daily_calories)
 
 
-# ==================== RESTUL FUNCȚIILOR ====================
+# ==================== UTILITARE MACRO & BMI ====================
 def calculate_bmi(weight, height):
     if not height or height <= 0:
         return None
@@ -122,26 +161,20 @@ def calculate_macros(daily_calories, macro_ratio):
     return proteins, carbs, fats, fiber
 
 
-def get_dishes_for_meal(meal_type_db, restaurant):
-    """
-    Returnează maxim 12 feluri active pentru tipul de masă,
-    doar din restaurantul curent sau cele default (globale).
-    """
+# ==================== SELECȚIE DISHES ====================
+def get_dishes_for_meal(meal_type_db, restaurant, constraints):
+    """Returnează maxim 12 feluri compatibile cu constrângerile."""
     return list(
-        Dish.objects.filter(
-            models.Q(restaurant=restaurant) | models.Q(is_default=True),
-            is_active=True,
-            meal_type=meal_type_db
-        )
+        get_available_dishes(meal_type_db, restaurant, constraints)
         .order_by('?')[:12]
     )
 
 
-def select_and_scale_dishes(meal_type_db, target_calories, target_p, target_c, target_f, restaurant):
-    candidates = get_dishes_for_meal(meal_type_db, restaurant)
+def select_and_scale_dishes(meal_type_db, target_calories, target_p, target_c, target_f, restaurant, constraints):
+    candidates = get_dishes_for_meal(meal_type_db, restaurant, constraints)
     if not candidates:
         return [{
-            "name": "Opțiune manuală recomandată",
+            "name": "Opțiune manuală recomandată (fără sugestii disponibile)",
             "grams": 0,
             "calories": 0,
             "proteins": 0,
@@ -175,8 +208,8 @@ def select_and_scale_dishes(meal_type_db, target_calories, target_p, target_c, t
     return selected
 
 
-# ==================== GENERARE PLAN COMPLET ====================
-def generate_weekly_meals(daily_calories, total_proteins, total_carbs, total_fats, restaurant):
+# ==================== GENERARE PLAN SĂPTĂMÂNAL ====================
+def generate_weekly_meals(daily_calories, total_proteins, total_carbs, total_fats, restaurant, constraints):
     plan = {}
     start_meal_name, days_offset, first_day_label = get_meal_start_info()
     week_days = get_week_days_labels(days_offset, first_day_label)
@@ -208,7 +241,9 @@ def generate_weekly_meals(daily_calories, total_proteins, total_carbs, total_fat
             meal_c = int(total_carbs * cal_pct)
             meal_f = int(total_fats * cal_pct)
 
-            dishes = select_and_scale_dishes(meal_type_db, meal_cal, meal_p, meal_c, meal_f, restaurant)
+            dishes = select_and_scale_dishes(
+                meal_type_db, meal_cal, meal_p, meal_c, meal_f, restaurant, constraints
+            )
             day_meals[display_name] = dishes
 
         plan[day_name] = day_meals
@@ -217,28 +252,37 @@ def generate_weekly_meals(daily_calories, total_proteins, total_carbs, total_fat
     return plan
 
 
-# ==================== FUNCȚIA PRINCIPALĂ (AJUSTATĂ PENTRU MULTI-RESTAURANT) ====================
+# ==================== FUNCȚIA PRINCIPALĂ ====================
 def generate_meal_plan(data, user=None, restaurant=None):
     """
-    Generează planul alimentar personalizat.
-    
-    Args:
-        data (dict): Datele din formular (age, gender, weight etc.)
-        user (User, optional): Utilizatorul autentificat
-        restaurant (Restaurant): Restaurantul curent – OBLIGATORIU pentru multi-tenant
-    
-    Returns:
-        dict: Planul generat + metadate
+    Generează planul alimentar personalizat, respectând constrângerile dietetice.
     """
     if restaurant is None:
         raise ValueError("Restaurantul este obligatoriu pentru generarea planului.")
+
+    # Extragere constrângeri dietetice din datele formularului
+    constraints = {
+        'vegan': data.get('is_vegan', False),
+        'vegetarian': data.get('is_vegetarian', False),
+        'raw_vegan': data.get('is_raw_vegan', False),
+        'gluten_free': data.get('is_gluten_free', False),
+        'lactose_free': data.get('is_lactose_free', False),
+        'allergens': data.get('allergens', []),  # listă de ID-uri Allergen
+    }
+
+    # Logică de consistență
+    if constraints['vegan']:
+        constraints['vegetarian'] = True
+        constraints['lactose_free'] = True
+    if constraints['raw_vegan']:
+        constraints['vegan'] = True
 
     daily_calories = calculate_daily_calories(data)
     bmi = calculate_bmi(data['weight'], data.get('height'))
     macro_ratio = data['macro_ratio']
 
     proteins, carbs, fats, fiber = calculate_macros(daily_calories, macro_ratio)
-    meals = generate_weekly_meals(daily_calories, proteins, carbs, fats, restaurant)
+    meals = generate_weekly_meals(daily_calories, proteins, carbs, fats, restaurant, constraints)
 
     saved_plan = None
     if user and user.is_authenticated:
@@ -257,6 +301,7 @@ def generate_meal_plan(data, user=None, restaurant=None):
             gender=data['gender'],
             weight=data['weight'],
             height=data.get('height'),
+            dietary_constraints=constraints,  # salvăm și constrângerile
             user_snapshot={
                 "daily_calories": daily_calories,
                 "bmi": bmi,
@@ -265,6 +310,7 @@ def generate_meal_plan(data, user=None, restaurant=None):
                 "fats": fats,
                 "fiber": fiber,
                 "meals": meals,
+                "dietary_constraints": constraints,
                 "generated_at": datetime.now().isoformat(),
                 "restaurant_id": restaurant.id,
                 "restaurant_name": restaurant.name,

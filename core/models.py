@@ -6,7 +6,13 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+class Allergen(models.Model):
+    name = models.CharField(max_length=100, unique=True)  # ex: "Nuci", "Ouă", "Lapte"
+    description = models.TextField(blank=True)
 
+    def __str__(self):
+        return self.name
+    
 GENDER_CHOICES = [('M', 'Masculin'), ('F', 'Feminin')]
 
 ACTIVITY_LEVELS = [
@@ -35,6 +41,12 @@ class Restaurant(models.Model):
     logo = models.ImageField(upload_to='restaurants/logos/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    clients = models.ManyToManyField(
+        User,
+        through='ClientMembership',
+        related_name='restaurants_joined',
+        blank=True
+    )
 
     def __str__(self):
         return self.name
@@ -54,23 +66,25 @@ class Restaurant(models.Model):
 # ==================== USER PROFILE ====================
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='members')
-    role = models.CharField(
-        max_length=20,
-        choices=[
-            ('owner', 'Proprietar'),
-            ('admin', 'Administrator'),
-            ('staff', 'Personal'),
-        ],
-        default='staff'
-    )
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)  # ← ADAUGĂ null=True, blank=True
+    # Preferințe globale (opțional, ex: unitate de măsură, limbă etc.)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} ({self.role} @ {self.restaurant.name})"
+        return self.user.username
+    
+class ClientMembership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    joined_at = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(
+        max_length=20,
+        choices=[('client', 'Client'), ('favorite', 'Preferat')],
+        default='client'
+    )
+    # Poți adăuga câmpuri suplimentare per restaurant: preferințe specifice, puncte loialitate etc.
 
     class Meta:
-        unique_together = ('user', 'restaurant')
+        unique_together = ('user', 'restaurant')  # un user nu poate fi de 2 ori client la același restaurant
 
 
 # ==================== MACRO RATIO ====================
@@ -100,6 +114,12 @@ class Dish(models.Model):
         default=0.0,
         help_text="g fibre per 100g"
     )
+    is_vegan = models.BooleanField(default=False, help_text="Fără produse animale")
+    is_vegetarian = models.BooleanField(default=False, help_text="Fără carne, dar poate lactate/ouă")
+    is_raw_vegan = models.BooleanField(default=False, help_text="Raw și vegan")
+    is_gluten_free = models.BooleanField(default=False)
+    is_lactose_free = models.BooleanField(default=False)
+    allergens = models.ManyToManyField(Allergen, blank=True, related_name='dishes')
     image = models.ImageField(upload_to='dishes/', null=True, blank=True)
 
 
@@ -133,7 +153,7 @@ class MealPlan(models.Model):
     bmi = models.FloatField(null=True, blank=True)
     target_weight = models.FloatField(null=True, blank=True)
     activity_level = models.CharField(max_length=20, choices=ACTIVITY_LEVELS, default='moderate')
-
+    dietary_constraints = models.JSONField(default=dict, blank=True)  # ex: {'vegan': True, 'gluten_free': True, 'allergens': [1,2]}
     age = models.PositiveIntegerField(null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
     weight = models.FloatField(null=True, blank=True)
@@ -151,16 +171,28 @@ class MealPlan(models.Model):
 
 # ==================== SIGNAL PENTRU USER PROFILE ====================
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """
-    Creează automat UserProfile la înregistrarea unui user nou.
-    Restaurantul este asignat temporar prin atributul _restaurant_to_assign în view.
-    """
+def add_user_to_restaurant(sender, instance, created, **kwargs):
     if created and hasattr(instance, '_restaurant_to_assign'):
         restaurant = instance._restaurant_to_assign
-        UserProfile.objects.create(
+        # Creează asocierea client-restaurant
+        ClientMembership.objects.create(
             user=instance,
             restaurant=restaurant,
-            role='staff'  # clienții obișnuiți sunt staff (sau poți schimba în 'client' dacă vrei)
+            role='client'  # sau 'staff' dacă e owner
         )
         del instance._restaurant_to_assign
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.PROTECT)
+    meal_plan = models.ForeignKey(MealPlan, null=True, on_delete=models.SET_NULL)
+    dishes = models.ManyToManyField(Dish, through='OrderItem')
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=[('pending', 'În așteptare'), ('paid', 'Plătit'), ('delivered', 'Livrat')])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    dish = models.ForeignKey(Dish, on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=8, decimal_places=2)

@@ -164,3 +164,48 @@ select:focus {
 .card:hover {
     transform: translateY(-2px);
 }
+
+/* ==================== STILURI PENTRU CHECKBOX-URI ȘI RESTRICȚII DIETETICE ==================== */
+
+/* Switch-urile bifate să fie verzi intens */
+.form-check-input:checked {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+
+/* Culoare text pentru preferințe "pozitive" (vegan, vegetarian etc.) */
+.form-check-label.text-success {
+    color: #28a745 !important;
+    font-weight: 600;
+}
+
+/* Culoare text pentru restricții (fără gluten, fără lactoză) */
+.form-check-label.text-warning {
+    color: #fd7e14 !important;
+    font-weight: 600;
+}
+
+/* Culoare text pentru alergii (roșu) */
+.form-check-label.text-danger {
+    color: #dc3545 !important;
+    font-weight: 600;
+}
+
+/* Select multiplu pentru alergeni – mai înalt și cu scroll frumos */
+#allergens,
+select[multiple] {
+    min-height: 160px;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+/* Opțiune selectată în multi-select */
+#allergens option:checked {
+    background: #667eea;
+    color: white;
+}
+
+/* Hover frumos pe opțiuni */
+#allergens option:hover {
+    background: #f8f9fa;
+}
