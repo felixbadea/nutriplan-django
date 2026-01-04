@@ -44,12 +44,12 @@
 
                     <div class="mt-auto">
                         <!-- Buton Vezi Planul -->
-                        <a href="{% url 'view-plan' plan.id %}" class="btn btn-outline-primary w-100 mb-2">
+                        <a href="/alimente-default/plan/{{ plan.id }}/" class="btn btn-outline-primary w-100 mb-2">
                             Vezi planul complet
                         </a>
-
+                    
                         <!-- Buton Tipărire / PDF -->
-                        <a href="{% url 'view-plan' plan.id %}?print=1" target="_blank" class="btn btn-success w-100">
+                        <a href="/alimente-default/plan/{{ plan.id }}/?print=1" target="_blank" class="btn btn-success w-100">
                             <i class="bi bi-printer"></i> Tipărește / Salvează PDF
                         </a>
                     </div>

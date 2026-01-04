@@ -126,16 +126,27 @@ class DashboardView(LoginRequiredMixin, ListView):
 
 # ==================== PLAN DETAIL ====================
 @login_required
-def plan_detail_view(request, plan_id):
+def plan_detail_view(request, restaurant_slug, plan_id):
+    # Validăm restaurantul (opțional, pentru securitate)
+    restaurant = get_object_or_404(Restaurant, slug=restaurant_slug, is_active=True)
+    
+    # Validăm planul (doar al userului curent)
     plan = get_object_or_404(MealPlan, id=plan_id, user=request.user)
-    plan_data = plan.user_snapshot
-    restaurant = getattr(request, 'current_restaurant', None)
 
-    return render(request, 'core/plan_detail.html', {
+    # Datele planului (din snapshot sau regenerate)
+    plan_data = plan.user_snapshot or {}
+
+    context = {
         'plan': plan,
         'plan_data': plan_data,
         'restaurant': restaurant,
-    })
+    }
+
+    # Dacă e ?print=1 → tipărește automat
+    if request.GET.get('print') == '1':
+        context['print_mode'] = True
+
+    return render(request, 'core/plan_detail.html', context)
 
 
 # ==================== AUTH ====================
